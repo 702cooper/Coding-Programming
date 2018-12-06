@@ -1,0 +1,12 @@
+[USERS] {
+	Marci, Arbor View, 10, 2, 003;004
+	Phil, Shadow Ridge, 11, 1, 004
+	Hannah, Arbor View, 12, 5, 001;214;268;297;284
+	Steve, Las Vegas, 9, 2, 987;879
+}
+[SCHOOLS] {
+	Arbor View
+	Shadow Ridge
+	Las Vegas
+}
+[BOOKS]
