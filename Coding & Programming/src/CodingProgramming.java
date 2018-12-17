@@ -242,18 +242,23 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			mark++;
 			list[mark][0] = "[USERS] {";
 			mark++;
+			int tempMark = 0;
 			for(int x = mark; x < userList.length; x++) {
-				for(int y = 0; y < 5; y++) {
-					if(userList[x - 2][0] != null)
-						list[x][y] = userList[x - 2][y];
+				for(int y = 0; y < 5;) {
+					if(userList[x - mark][0] != null) {
+						list[x][y] = userList[x - mark][y];
+						y++;
+					}
 					else {
-						x = userList.length + 1;
-						y = 6;
+						break;
+						//y = 6;
 						//mark--;
 					}
 				}
-				mark++;
+				if(userList[x - mark][0] != null)
+					tempMark++;
 			}
+			mark += tempMark;
 			list[mark][0] = "}";
 			mark++;
 			
@@ -263,15 +268,16 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			mark++;
 			for(int x = mark; x < schoolList.length; x++) {
 				for(int y = 0; y < 5; y++) {
-					if(schoolList[x - 2][0] != null)
-						list[x][y] = schoolList[x - 2][y];
+					if(schoolList[x - mark][0] != null)
+						list[x][y] = schoolList[x - mark][y];
 					else {
 						x = schoolList.length + 1;
 						y = 6;
 						//mark--;
 					}
 				}
-				mark++;
+				if(schoolList[x][0] != null)
+					mark++;
 			}
 			list[mark][0] = "}";
 			mark++;
@@ -283,23 +289,26 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			
 			for(int x = mark; x < bookList.length; x++) {
 				for(int y = 0; y < 5; y++) {
-					if(bookList[x - 2][0] != null)
-						list[x][y] = bookList[x - 2][y];
+					if(bookList[x - mark][0] != null)
+						list[x][y] = bookList[x - mark][y];
 					else {
 						x = bookList.length + 1;
 						y = 6;
 						//mark--;
 					}
 				}
-				mark++;
+				if(bookList[x][0] != null)
+					mark++;
 			}
 			list[mark][0] = "}";
 			mark++;
 			
 			for(int x = 0; x < list.length; x++) {
 				for(int y = 0; y < list[x].length; y++) {
+					System.out.println(list[x][y]);
 					//Print here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				}
+				System.out.println("");
 			}
 			
 			// Note that write() does not automatically
