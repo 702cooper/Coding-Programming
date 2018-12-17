@@ -11,12 +11,11 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 //READ THESE
-//Make List of schools proper
 //Figure out view and stuff
 //make fileWrite run when closed
 
 public class CodingProgramming extends JFrame implements ActionListener {
-	static final int LIMIT = 89489404;
+	//static final int LIMIT = (2147483647 - 8) / 5;
 	
 	//add JButtons here
 	JPanel buttons;
@@ -48,8 +47,8 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		//This is for TEST purposes
 		//REMOVE WHEN DONE
 		/*for(int x = 0; x < 4; x++) {
-			for(int y = 0; y < userList[x].length; y++) {
-				System.out.println(userList[x][y]);
+			for(int y = 0; y < bookList[x].length; y++) {
+				System.out.println(bookList[x][y]);
 			}
 			System.out.println("");
 		}*/
@@ -57,10 +56,22 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		//Creates mainFrame(window)
 		JFrame mainFrame = new JFrame();
 		mainFrame.setTitle("E-Book Library");
-		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		JPanel mainPanel = (JPanel)mainFrame.getContentPane();
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+		mainFrame.addWindowListener(new WindowAdapter() {
+			//I skipped unused callbacks for readability
+			
+			@Override
+			public void windowClosing(WindowEvent e) {
+				if(JOptionPane.showConfirmDialog(mainFrame, "Are you sure ?") == JOptionPane.YES_OPTION){
+					fileWrite(userList, schoolList, bookList);
+					mainFrame.setVisible(false);
+					mainFrame.dispose();
+				}
+			}
+		});
 
 		nameListPanel = new JPanel();
 		JLabel nameListLabel = new JLabel("");
@@ -77,9 +88,9 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		nameListList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent event) {
 				if(event.getValueIsAdjusting())
-					listValue = event.getLastIndex();
+					listValue = event.getFirstIndex();
+				System.out.println("Selected from " + event.getFirstIndex() + " to " + event.getLastIndex());
 				return;
-				//System.out.println("Selected from " + event.getFirstIndex() + " to " + event.getLastIndex());
 			}
 		});
 		nameListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -94,7 +105,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		String[] schoolListSort = new String[schoolList.length];
 		String[] temp = new String[schoolList.length];
 		for(int x = 0; x < schoolList.length; x++) {
-			temp[x] = schoolList[x][1];
+			temp[x] = schoolList[x][0];
 		}
 		temp = removeDuplicates(temp);
 		for(int x = 0; x < temp.length; x++) {
@@ -156,8 +167,8 @@ public class CodingProgramming extends JFrame implements ActionListener {
 
 	public void actionPerformed(ActionEvent event) {
 		@SuppressWarnings("null")
-		int listSelect = -1;
-		if(event.getSource() == sortBox) {
+		Object control = event.getSource();
+		if(control == sortBox) {
 			JComboBox cb = (JComboBox)event.getSource();
 			
 			int typeSort = (int)cb.getSelectedIndex();
@@ -166,24 +177,21 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				schoolListPanel.setVisible(false);
 				gradeListPanel.setVisible(false);
 				nameListPanel.setVisible(true);
-				listSelect = 0;
 			}	
 			else if(typeSort == 1) {
 				nameListPanel.setVisible(false);
 				gradeListPanel.setVisible(false);
 				schoolListPanel.setVisible(true);
-				listSelect = 1;
 			}
 			else if(typeSort == 2) {
 				nameListPanel.setVisible(false);
 				schoolListPanel.setVisible(false);
 				gradeListPanel.setVisible(true);
-				listSelect = 2;
 			}
 			//System.out.println("Selected from " + event.getStateChange());
 		}
-		else if(event.getSource() == view){
-			if(listSelect == 0) {
+		else if(control == view){
+			if(nameListPanel.isVisible()) {
 				String[] sum = {""};
 				String summary = "";
 				try {
@@ -216,39 +224,119 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		}
 	}
 	
-	public static void fileWrite(String[][] list) {
+	public static void fileWrite(String[][] userList, String[][] schoolList, String[][] bookList) {
 		// The name of the file to open.
-        String fileName = "list.txt";
-
-        try {
-            // Assume default encoding.
-            FileWriter fileWriter = new FileWriter(fileName);
-
-            // Always wrap FileWriter in BufferedWriter.
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-            // Note that write() does not automatically
-            // append a newline character.
-            for(int x = 0; x < list.length; x++) {
-            	for(int y = 0; y < list[x].length; y++) {
-            		bufferedWriter.write(list[x][y] + ", ");
-            	}
-            	bufferedWriter.newLine();
-            }
-            //bufferedWriter.write("Hello there,");
-            //bufferedWriter.write(" here is some text.");
-            //bufferedWriter.newLine();
-            //bufferedWriter.write("We are writing");
-            //bufferedWriter.write(" the text to the file.");
-
-            // Always close files.
-            bufferedWriter.close();
-        }
-        catch(IOException ex) {
-        	System.out.println("Error writing to file '" + fileName + "'");
-            // Or we could just do this:
-            // ex.printStackTrace();
-        }
+		String fileName = "list.txt";
+		
+		try {
+			// Assume default encoding.
+			FileWriter fileWriter = new FileWriter(fileName);
+			
+			// Always wrap FileWriter in BufferedWriter.
+			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+			
+			String[][] list = new String[9999][5];
+			int mark = 0;
+			
+			list[mark][0] = "//Name, School, Grade, Number of Books Checked Out, Serial of Books";
+			mark++;
+			list[mark][0] = "[USERS] {";
+			mark++;
+			for(int x = mark; x < userList.length; x++) {
+				for(int y = 0; y < 5; y++) {
+					if(userList[x - 2][0] != null)
+						list[x][y] = userList[x - 2][y];
+					else {
+						x = userList.length + 1;
+						y = 6;
+						//mark--;
+					}
+				}
+				mark++;
+			}
+			list[mark][0] = "}";
+			mark++;
+			
+			list[mark][0] = "//School Name";
+			mark++;
+			list[mark][0] = "[SCHOOLS] {";
+			mark++;
+			for(int x = mark; x < schoolList.length; x++) {
+				for(int y = 0; y < 5; y++) {
+					if(schoolList[x - 2][0] != null)
+						list[x][y] = schoolList[x - 2][y];
+					else {
+						x = schoolList.length + 1;
+						y = 6;
+						//mark--;
+					}
+				}
+				mark++;
+			}
+			list[mark][0] = "}";
+			mark++;
+			
+			list[mark][0] = "//Serial Number, Book Name, Author, Number in Stock";
+			mark++;
+			list[mark][0] = "[BOOKS] {";
+			mark++;
+			
+			for(int x = mark; x < bookList.length; x++) {
+				for(int y = 0; y < 5; y++) {
+					if(bookList[x - 2][0] != null)
+						list[x][y] = bookList[x - 2][y];
+					else {
+						x = bookList.length + 1;
+						y = 6;
+						//mark--;
+					}
+				}
+				mark++;
+			}
+			list[mark][0] = "}";
+			mark++;
+			
+			for(int x = 0; x < list.length; x++) {
+				for(int y = 0; y < list[x].length; y++) {
+					//Print here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				}
+			}
+			
+			// Note that write() does not automatically
+			// append a newline character.
+			for(int x = 0; x < mark; x++) {
+				for(int y = 0; y < list[x].length; y++) {
+					if(list[x][y] != null) {
+						bufferedWriter.write(list[x][y]);
+						if(y != 4) {
+							if(list[x][y + 1] != null) {
+								bufferedWriter.write(", ");
+							}
+						}
+					}
+					else {
+						y = list[x].length + 1;
+						x++;
+					}
+				}
+				bufferedWriter.newLine();
+			}
+			
+			//bufferedWriter.write("Hello there,");
+			//bufferedWriter.write(" here is some text.");
+			//bufferedWriter.newLine();
+			//bufferedWriter.write("We are writing");
+			//bufferedWriter.write(" the text to the file.");
+			mark = 0;
+			
+			// Always close files.
+			bufferedWriter.close();
+		}
+		catch(IOException ex) {
+			System.out.println("Error writing to file '" + fileName + "'");
+			// Or we could just do this:
+			// ex.printStackTrace();
+		}
 	}
 	
 	public String[][] fileRead(int opt) {
@@ -277,7 +365,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
                 total += nRead;
             }
             
-            res = new String[total][5];
+            res = new String[9999][5];
             
             if(opt == 0) {
             	String temp = "";
@@ -289,13 +377,14 @@ public class CodingProgramming extends JFrame implements ActionListener {
             			temp += bufRes.charAt(x);
             			if(bufRes.charAt(x) == ']') {
             				mark = 0;
+            				
             				if(temp.equals("[USERS]")) {
                         		temp = "";
                         		int parMark = 0;
                         		for(int y = (x + 1); y < bufRes.length(); y++) {
                         			if(parMark == 0) {
                         				if(bufRes.charAt(y) == '{') {
-                        					y++;
+                        					y = y + 3;
                         					parMark = 1;
                         				}
                         			}
@@ -305,6 +394,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
                         					y = bufRes.length() + 1;
                         				}
                         				else if(bufRes.charAt(y) == ',') {
+                        					temp = temp.trim();
                         					res[arRow][arCol] = temp;
                         					if(arCol == 4)
                         						arCol = 0;
@@ -314,6 +404,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
                         					y++; 
                         				}
                         				else if(bufRes.charAt(y) == '\n') {
+                        					temp = temp.trim();
                         					res[arRow][arCol] = temp;
                         					arRow++;
                         					arCol = 0;
@@ -324,8 +415,80 @@ public class CodingProgramming extends JFrame implements ActionListener {
                         				}
                         			}
                         		}
+                				x = bufRes.length() + 1;
                         	}
-            				x = bufRes.length() +1;
+            				else {
+            					temp = "";
+            				}
+            				
+            			}
+            		}
+            		else if(bufRes.charAt(x) == '[') {
+            			mark = 1;
+            			temp += bufRes.charAt(x);
+            		}
+                	//System.out.println(temp);
+            	}
+            	//System.out.println(temp);
+            	//Last line is put in list variable
+            	res[arRow][arCol] = temp;
+            	temp = "";
+            	mark = 0;
+            }
+            else if(opt == 1) {
+            	String temp = "";
+            	int arRow = 0;
+            	int arCol = 0;
+            	int mark = 0;
+            	for(int x = 0; x < bufRes.length(); x++) {
+            		if(mark != 0) {
+            			temp += bufRes.charAt(x);
+            			if(bufRes.charAt(x) == ']') {
+            				mark = 0;
+            				
+            				if(temp.equals("[SCHOOLS]")) {
+                        		temp = "";
+                        		int parMark = 0;
+                        		for(int y = (x + 1); y < bufRes.length(); y++) {
+                        			if(parMark == 0) {
+                        				if(bufRes.charAt(y) == '{') {
+                        					y = y + 3;
+                        					parMark = 1;
+                        				}
+                        			}
+                        			if(parMark != 0) {
+                        				if(bufRes.charAt(y) == '}') {
+                        					parMark = 0;
+                        					y = bufRes.length() + 1;
+                        				}
+                        				else if(bufRes.charAt(y) == ',') {
+                        					temp = temp.trim();
+                        					res[arRow][arCol] = temp;
+                        					if(arCol == 4)
+                        						arCol = 0;
+                        					else
+                        						arCol++;
+                        					temp = "";
+                        					y++; 
+                        				}
+                        				else if(bufRes.charAt(y) == '\n') {
+                        					temp = temp.trim();
+                        					res[arRow][arCol] = temp;
+                        					arRow++;
+                        					arCol = 0;
+                        					temp = "";
+                        				}
+                        				else {
+                        					temp += bufRes.charAt(y);
+                        				}
+                        			}
+                        		}
+                				x = bufRes.length() + 1;
+                        	}
+            				else {
+            					temp = "";
+            				}
+            				
             			}
             		}
             		else if(bufRes.charAt(x) == '[') {
@@ -339,7 +502,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
             	res[arRow][arCol] = temp;
             	temp = "";
             }
-            else if(opt == 1) {
+            else if(opt == 2) {
             	String temp = "";
             	int arRow = 0;
             	int arCol = 0;
@@ -349,13 +512,14 @@ public class CodingProgramming extends JFrame implements ActionListener {
             			temp += bufRes.charAt(x);
             			if(bufRes.charAt(x) == ']') {
             				mark = 0;
-            				if(temp.equals("[SCHOOLS]")) {
+            				
+            				if(temp.equals("[BOOKS]")) {
                         		temp = "";
                         		int parMark = 0;
                         		for(int y = (x + 1); y < bufRes.length(); y++) {
                         			if(parMark == 0) {
                         				if(bufRes.charAt(y) == '{') {
-                        					y++;
+                        					y = y + 3;
                         					parMark = 1;
                         				}
                         			}
@@ -365,6 +529,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
                         					y = bufRes.length() + 1;
                         				}
                         				else if(bufRes.charAt(y) == ',') {
+                        					temp = temp.trim();
                         					res[arRow][arCol] = temp;
                         					if(arCol == 4)
                         						arCol = 0;
@@ -374,6 +539,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
                         					y++; 
                         				}
                         				else if(bufRes.charAt(y) == '\n') {
+                        					temp = temp.trim();
                         					res[arRow][arCol] = temp;
                         					arRow++;
                         					arCol = 0;
@@ -384,8 +550,12 @@ public class CodingProgramming extends JFrame implements ActionListener {
                         				}
                         			}
                         		}
+                				x = bufRes.length() + 1;
                         	}
-            				x = bufRes.length() +1;
+            				else {
+            					temp = "";
+            				}
+            				
             			}
             		}
             		else if(bufRes.charAt(x) == '[') {
