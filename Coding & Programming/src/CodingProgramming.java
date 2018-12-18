@@ -46,9 +46,9 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		
 		//This is for TEST purposes
 		//REMOVE WHEN DONE
-		/*for(int x = 0; x < 4; x++) {
-			for(int y = 0; y < bookList[x].length; y++) {
-				System.out.println(bookList[x][y]);
+		/*for(int x = 0; x < 15; x++) {
+			for(int y = 0; y < userList[x].length; y++) {
+				System.out.println(userList[x][y]);
 			}
 			System.out.println("");
 		}*/
@@ -235,100 +235,88 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			// Always wrap FileWriter in BufferedWriter.
 			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 			
-			String[][] list = new String[9999][5];
-			int mark = 0;
-			
-			list[mark][0] = "//Name, School, Grade, Number of Books Checked Out, Serial of Books";
-			mark++;
-			list[mark][0] = "[USERS] {";
-			mark++;
-			int tempMark = 0;
-			for(int x = mark; x < userList.length; x++) {
-				for(int y = 0; y < 5;) {
-					if(userList[x - mark][0] != null) {
-						list[x][y] = userList[x - mark][y];
-						y++;
-					}
-					else {
-						break;
-						//y = 6;
-						//mark--;
-					}
-				}
-				if(userList[x - mark][0] != null)
-					tempMark++;
-			}
-			mark += tempMark;
-			list[mark][0] = "}";
-			mark++;
-			
-			list[mark][0] = "//School Name";
-			mark++;
-			list[mark][0] = "[SCHOOLS] {";
-			mark++;
-			for(int x = mark; x < schoolList.length; x++) {
-				for(int y = 0; y < 5; y++) {
-					if(schoolList[x - mark][0] != null)
-						list[x][y] = schoolList[x - mark][y];
-					else {
-						x = schoolList.length + 1;
-						y = 6;
-						//mark--;
-					}
-				}
-				if(schoolList[x][0] != null)
-					mark++;
-			}
-			list[mark][0] = "}";
-			mark++;
-			
-			list[mark][0] = "//Serial Number, Book Name, Author, Number in Stock";
-			mark++;
-			list[mark][0] = "[BOOKS] {";
-			mark++;
-			
-			for(int x = mark; x < bookList.length; x++) {
-				for(int y = 0; y < 5; y++) {
-					if(bookList[x - mark][0] != null)
-						list[x][y] = bookList[x - mark][y];
-					else {
-						x = bookList.length + 1;
-						y = 6;
-						//mark--;
-					}
-				}
-				if(bookList[x][0] != null)
-					mark++;
-			}
-			list[mark][0] = "}";
-			mark++;
+			String[] list = new String[9999];
+			boolean uMark = false;
+			boolean sMark = false;
+			boolean bMark = false;
 			
 			for(int x = 0; x < list.length; x++) {
-				for(int y = 0; y < list[x].length; y++) {
-					System.out.println(list[x][y]);
-					//Print here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				}
-				System.out.println("");
-			}
-			
-			// Note that write() does not automatically
-			// append a newline character.
-			for(int x = 0; x < mark; x++) {
-				for(int y = 0; y < list[x].length; y++) {
-					if(list[x][y] != null) {
-						bufferedWriter.write(list[x][y]);
-						if(y != 4) {
-							if(list[x][y + 1] != null) {
-								bufferedWriter.write(", ");
+				if(uMark == false) {
+					list[x] = "//Name, School, Grade, Number of Books Checked Out, Serial of Books";
+					x++;
+					list[x] = "[USERS] {";
+					x++;
+					for(int y = 0; y < userList.length; y++) {
+						if(userList[y][0] != null) {
+							for(int z = 0; z < userList[y].length; z++) {
+								if(list[x] != null)
+									list[x] = list[x] + userList[y][z];
+								else
+									list[x] = "	" + userList[y][z];
+								if(z < 4) {
+									if(userList[y][z + 1] != null)
+										list[x] = list[x] + ", ";
+								}
 							}
+							x++;
 						}
 					}
-					else {
-						y = list[x].length + 1;
-						x++;
-					}
+					list[x] = "}";
+					x++;
+					uMark = true;
 				}
-				bufferedWriter.newLine();
+				else if(sMark == false) {
+					list[x] = "//School Name";
+					x++;
+					list[x] = "[SCHOOLS] {";
+					x++;
+					for(int y = 0; y < schoolList.length; y++) {
+						if(schoolList[y][0] != null) {
+							for(int z = 0; z < schoolList[y].length; z++) {
+								if(list[x] != null)
+									list[x] = list[x] + schoolList[y][z];
+								else
+									list[x] = "	" + schoolList[y][z];
+								if(z < 4) {
+									if(schoolList[y][z + 1] != null)
+										list[x] = list[x] + ", ";
+								}
+							}
+							x++;
+						}
+					}
+					list[x] = "}";
+					x++;
+					sMark = true;
+				}
+				else if(bMark == false) {
+					list[x] = "//Serial Number, Book Name, Author, Number in Stock";
+					x++;
+					list[x] = "[BOOKS] {";
+					x++;
+					for(int y = 0; y < bookList.length; y++) {
+						if(bookList[y][0] != null) {
+							for(int z = 0; z < bookList[y].length; z++) {
+								if(list[x] != null)
+									list[x] = list[x] + bookList[y][z];
+								else
+									list[x] = "	" + bookList[y][z];
+								if(z < 4) {
+									if(bookList[y][z + 1] != null)
+										list[x] = list[x] + ", ";
+								}
+							}
+							x++;
+						}
+					}
+					list[x] = "}";
+					x++;
+					bMark = true;
+				}
+			}
+			
+			for(int x = 0; x < list.length; x++) {
+				bufferedWriter.write(list[x]);
 			}
 			
 			//bufferedWriter.write("Hello there,");
@@ -336,7 +324,6 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			//bufferedWriter.newLine();
 			//bufferedWriter.write("We are writing");
 			//bufferedWriter.write(" the text to the file.");
-			mark = 0;
 			
 			// Always close files.
 			bufferedWriter.close();
@@ -374,7 +361,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
                 total += nRead;
             }
             
-            res = new String[9999][5];
+            res = new String[total][5];
             
             if(opt == 0) {
             	String temp = "";
@@ -443,6 +430,13 @@ public class CodingProgramming extends JFrame implements ActionListener {
             	res[arRow][arCol] = temp;
             	temp = "";
             	mark = 0;
+            	
+            	for(int x = 0; x < res.length; x++) {
+            		for(int y = 0; y < res[x].length; y++) {
+            			if(res[x][y] != null)
+            				res[x][y] = res[x][y].trim();
+            		}
+            	}
             }
             else if(opt == 1) {
             	String temp = "";
@@ -510,6 +504,14 @@ public class CodingProgramming extends JFrame implements ActionListener {
             	//Last line is put in list variable
             	res[arRow][arCol] = temp;
             	temp = "";
+            	mark = 0;
+            	
+            	for(int x = 0; x < res.length; x++) {
+            		for(int y = 0; y < res[x].length; y++) {
+            			if(res[x][y] != null)
+            				res[x][y] = res[x][y].trim();
+            		}
+            	}
             }
             else if(opt == 2) {
             	String temp = "";
@@ -577,6 +579,14 @@ public class CodingProgramming extends JFrame implements ActionListener {
             	//Last line is put in list variable
             	res[arRow][arCol] = temp;
             	temp = "";
+            	mark = 0;
+            	
+            	for(int x = 0; x < res.length; x++) {
+            		for(int y = 0; y < res[x].length; y++) {
+            			if(res[x][y] != null)
+            				res[x][y] = res[x][y].trim();
+            		}
+            	}
             }
             // Always close files.
             inputStream.close();        
