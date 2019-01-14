@@ -26,7 +26,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 	JPanel schoolListPanel;
 	JPanel gradeListPanel;
 	JComboBox<?> sortBox;
-	JList nameListList;
+	JList<?> nameListList;
 	int listValue;
 	String[] nameListSort;		
 	//Name, School, Grade, # of Books checked out, Books checked out
@@ -65,8 +65,13 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			
 			@Override
 			public void windowClosing(WindowEvent e) {
-				if(JOptionPane.showConfirmDialog(mainFrame, "Are you sure ?") == JOptionPane.YES_OPTION){
+				int options = JOptionPane.showConfirmDialog(mainFrame, "Save Before Quitting?");
+				if(options == JOptionPane.YES_OPTION){
 					fileWrite(userList, schoolList, bookList);
+					mainFrame.setVisible(false);
+					mainFrame.dispose();
+				}
+				else if(options == JOptionPane.NO_OPTION) {
 					mainFrame.setVisible(false);
 					mainFrame.dispose();
 				}
@@ -83,7 +88,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			else
 				x++;
 		}
-		nameListList = new JList(nameListSort);
+		nameListList = new JList<Object>(nameListSort);
 		//listValue = (Integer) null;
 		nameListList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent event) {
@@ -113,7 +118,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		}
 		//for(int x = 0; x < 5; x++)
 			//System.out.println(schoolListSort[x]);
-		JList schoolListList = new JList(schoolListSort);
+		JList<?> schoolListList = new JList<Object>(schoolListSort);
 		schoolListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JScrollPane schoolListScroll = new JScrollPane(schoolListList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		schoolListPanel.add(schoolListScroll);
@@ -127,7 +132,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		for(int x = 0; x < userList.length; x++) {
 			gradeListSort[x] = userList[x][2];
 		}
-		JList gradeListList = new JList(gradeListSort);
+		JList<?> gradeListList = new JList<Object>(gradeListSort);
 		gradeListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JScrollPane gradeListScroll = new JScrollPane(gradeListList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		gradeListPanel.add(gradeListScroll);
@@ -139,7 +144,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		JLabel sortList = new JLabel("Sort By");
 		sortListPanel.add(sortList);
 		String[] sort = {"Name", "School", "Grade"};
-		sortBox = new JComboBox(sort);
+		sortBox = new JComboBox<Object>(sort);
 		sortBox.addActionListener(this);
 		
 		sortListPanel.add(sortBox);
@@ -169,7 +174,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		@SuppressWarnings("null")
 		Object control = event.getSource();
 		if(control == sortBox) {
-			JComboBox cb = (JComboBox)event.getSource();
+			JComboBox<?> cb = (JComboBox<?>)event.getSource();
 			
 			int typeSort = (int)cb.getSelectedIndex();
 			if(typeSort == 0) {
@@ -220,13 +225,150 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			
 		}
 		else if(event.getSource() == enter) {
-			
+			String name = null;
+			String school = null;
+			String grade = null;
+			String num = null;
+			String cereal = null;
+			JTextField nameTextField = new JTextField();
+			JTextField schoolTextField = new JTextField();
+			JTextField gradeTextField = new JTextField();
+			JTextField numTextField = new JTextField();
+			JTextField cerealTextField = new JTextField();
+			Object[] message = {
+			    "Name:", nameTextField,
+			    "School:", schoolTextField,
+			    "Grade:", gradeTextField,
+			    "Number of Books Checked Out:", numTextField,
+			    "Serial of Books:", cerealTextField,
+			};
+			int option = JOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
+			if (option == JOptionPane.OK_OPTION)
+			{
+			    name = nameTextField.getText();
+			    school = schoolTextField.getText();
+			    grade = gradeTextField.getText();
+			    num = numTextField.getText();
+			    cereal = cerealTextField.getText();
+				String[] newEnt = {name, school, grade, num, cereal};
+				for(int x = 0; x < newEnt.length; x++)
+					System.out.println(newEnt);
+				for(int x = 0; x < userList.length; x++) {
+					if(userList[x][0] == null) {
+						for(int y = 0; y < newEnt.length; y++)
+							userList[x][y] = newEnt[y];
+						break;
+					}
+				}
+				nameListPanel.disable();
+				nameListPanel.enable();
+			}
+			/*try {
+				String[] newEnt = {name, school, grade, num, cereal};
+				for(int x = 0; x < userList.length; x++) {
+					if(userList[x][0] == null) {
+						userList[x] = newEnt;
+						break;
+					}
+				}
+			}
+			catch(NullPointerException error) {
+			}*/
 		}
 	}
 	
 	public static void fileWrite(String[][] userList, String[][] schoolList, String[][] bookList) {
 		// The name of the file to open.
 		String fileName = "list.txt";
+		
+		String[] list = new String[9999];
+		boolean uMark = false;
+		boolean sMark = false;
+		boolean bMark = false;
+		
+		for(int x = 0; x < list.length; x++) {
+			if(uMark == false) {
+				list[x] = "//Name, School, Grade, Number of Books Checked Out, Serial of Books";
+				x++;
+				list[x] = "[USERS] {";
+				x++;
+				for(int y = 0; y < userList.length; y++) {
+					if(userList[y][0] != null) {
+						for(int z = 0; z < userList[y].length; z++) {
+							if(list[x] != null && userList[y][z] != null)
+								list[x] = list[x] + userList[y][z];
+							else {
+								if(userList[y][z] != null)
+									list[x] = "	" + userList[y][z];
+							}
+							if(z < 4) {
+								if(userList[y][z + 1] != null)
+									list[x] = list[x] + ", ";
+							}
+						}
+						x++;
+					}
+				}
+				x--;
+				list[x] = "}";
+				x++;
+				uMark = true;
+			}
+			if(sMark == false) {
+				list[x] = "//School Name";
+				x++;
+				list[x] = "[SCHOOLS] {";
+				x++;
+				for(int y = 0; y < schoolList.length; y++) {
+					if(schoolList[y][0] != null) {
+						for(int z = 0; z < schoolList[y].length; z++) {
+							if(list[x] != null && schoolList[y][z] != null)
+								list[x] = list[x] + schoolList[y][z];
+							else {
+								if(schoolList[y][z] != null)
+									list[x] = "	" + schoolList[y][z];
+							}
+							if(z < 4) {
+								if(schoolList[y][z + 1] != null)
+									list[x] = list[x] + ", ";
+							}
+						}
+						x++;
+					}
+				}
+				x--;
+				list[x] = "}";
+				x++;
+				sMark = true;
+			}
+			if(bMark == false) {
+				list[x] = "//Serial Number, Book Name, Author, Number in Stock";
+				x++;
+				list[x] = "[BOOKS] {";
+				x++;
+				for(int y = 0; y < bookList.length; y++) {
+					if(bookList[y][0] != null) {
+						for(int z = 0; z < bookList[y].length; z++) {
+							if(list[x] != null && bookList[y][z] != null)
+								list[x] = list[x] + bookList[y][z];
+							else {
+								if(bookList[y][z] != null)
+									list[x] = "	" + bookList[y][z];
+							}
+							if(z < 4) {
+								if(bookList[y][z + 1] != null)
+									list[x] = list[x] + ", ";
+							}
+						}
+						x++;
+					}
+				}
+				x--;
+				list[x] = "}";
+				x++;
+				bMark = true;
+			}
+		}
 		
 		try {
 			// Assume default encoding.
@@ -235,95 +377,16 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			// Always wrap FileWriter in BufferedWriter.
 			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 			
-			String[] list = new String[9999];
-			boolean uMark = false;
-			boolean sMark = false;
-			boolean bMark = false;
-			
 			for(int x = 0; x < list.length; x++) {
-				if(uMark == false) {
-					list[x] = "//Name, School, Grade, Number of Books Checked Out, Serial of Books";
-					x++;
-					list[x] = "[USERS] {";
-					x++;
-					for(int y = 0; y < userList.length; y++) {
-						if(userList[y][0] != null) {
-							for(int z = 0; z < userList[y].length; z++) {
-								if(list[x] != null)
-									list[x] = list[x] + userList[y][z];
-								else
-									list[x] = "	" + userList[y][z];
-								if(z < 4) {
-									if(userList[y][z + 1] != null)
-										list[x] = list[x] + ", ";
-								}
-							}
-							x++;
-						}
-					}
-					list[x] = "}";
-					x++;
-					uMark = true;
+				if(list[x] != null) {
+					String temp = list[x];
+					bufferedWriter.write(temp);
+					bufferedWriter.newLine();
 				}
-				else if(sMark == false) {
-					list[x] = "//School Name";
-					x++;
-					list[x] = "[SCHOOLS] {";
-					x++;
-					for(int y = 0; y < schoolList.length; y++) {
-						if(schoolList[y][0] != null) {
-							for(int z = 0; z < schoolList[y].length; z++) {
-								if(list[x] != null)
-									list[x] = list[x] + schoolList[y][z];
-								else
-									list[x] = "	" + schoolList[y][z];
-								if(z < 4) {
-									if(schoolList[y][z + 1] != null)
-										list[x] = list[x] + ", ";
-								}
-							}
-							x++;
-						}
-					}
-					list[x] = "}";
-					x++;
-					sMark = true;
-				}
-				else if(bMark == false) {
-					list[x] = "//Serial Number, Book Name, Author, Number in Stock";
-					x++;
-					list[x] = "[BOOKS] {";
-					x++;
-					for(int y = 0; y < bookList.length; y++) {
-						if(bookList[y][0] != null) {
-							for(int z = 0; z < bookList[y].length; z++) {
-								if(list[x] != null)
-									list[x] = list[x] + bookList[y][z];
-								else
-									list[x] = "	" + bookList[y][z];
-								if(z < 4) {
-									if(bookList[y][z + 1] != null)
-										list[x] = list[x] + ", ";
-								}
-							}
-							x++;
-						}
-					}
-					list[x] = "}";
-					x++;
-					bMark = true;
+				else {
+					x = list.length + 1;
 				}
 			}
-			
-			for(int x = 0; x < list.length; x++) {
-				bufferedWriter.write(list[x]);
-			}
-			
-			//bufferedWriter.write("Hello there,");
-			//bufferedWriter.write(" here is some text.");
-			//bufferedWriter.newLine();
-			//bufferedWriter.write("We are writing");
-			//bufferedWriter.write(" the text to the file.");
 			
 			// Always close files.
 			bufferedWriter.close();
@@ -363,229 +426,85 @@ public class CodingProgramming extends JFrame implements ActionListener {
             
             res = new String[total][5];
             
-            if(opt == 0) {
-            	String temp = "";
-            	int arRow = 0;
-            	int arCol = 0;
-            	int mark = 0;
-            	for(int x = 0; x < bufRes.length(); x++) {
-            		if(mark != 0) {
-            			temp += bufRes.charAt(x);
-            			if(bufRes.charAt(x) == ']') {
-            				mark = 0;
-            				
-            				if(temp.equals("[USERS]")) {
-                        		temp = "";
-                        		int parMark = 0;
-                        		for(int y = (x + 1); y < bufRes.length(); y++) {
-                        			if(parMark == 0) {
-                        				if(bufRes.charAt(y) == '{') {
-                        					y = y + 3;
-                        					parMark = 1;
-                        				}
-                        			}
-                        			if(parMark != 0) {
-                        				if(bufRes.charAt(y) == '}') {
-                        					parMark = 0;
-                        					y = bufRes.length() + 1;
-                        				}
-                        				else if(bufRes.charAt(y) == ',') {
-                        					temp = temp.trim();
-                        					res[arRow][arCol] = temp;
-                        					if(arCol == 4)
-                        						arCol = 0;
-                        					else
-                        						arCol++;
-                        					temp = "";
-                        					y++; 
-                        				}
-                        				else if(bufRes.charAt(y) == '\n') {
-                        					temp = temp.trim();
-                        					res[arRow][arCol] = temp;
-                        					arRow++;
-                        					arCol = 0;
-                        					temp = "";
-                        				}
-                        				else {
-                        					temp += bufRes.charAt(y);
-                        				}
-                        			}
-                        		}
-                				x = bufRes.length() + 1;
-                        	}
-            				else {
-            					temp = "";
-            				}
-            				
+            String keyword = new String();
+            if(opt == 0)
+            	keyword = "[USERS]";
+            else if(opt == 1)
+            	keyword = "[SCHOOLS]";
+            else if(opt == 2)
+            	keyword = "[BOOKS]";
+            
+            String temp = "";
+            int arRow = 0;
+            int arCol = 0;
+            int mark = 0;
+            for(int x = 0; x < bufRes.length(); x++) {
+            	if(mark != 0) {
+            		temp += bufRes.charAt(x);
+            		if(bufRes.charAt(x) == ']') {
+            			mark = 0;
+            			
+            			if(temp.equals(keyword)) {
+                       		temp = "";
+                       		int parMark = 0;
+                       		for(int y = (x + 1); y < bufRes.length(); y++) {
+                       			if(parMark == 0) {
+                       				if(bufRes.charAt(y) == '{') {
+                       					y = y + 3;
+                       					parMark = 1;
+                       				}
+                       			}
+                       			if(parMark != 0) {
+                       				if(bufRes.charAt(y) == '}') {
+                       					parMark = 0;
+                       					y = bufRes.length() + 1;
+                       				}
+                       				else if(bufRes.charAt(y) == ',') {
+                       					temp = temp.trim();
+                       					res[arRow][arCol] = temp;
+                       					if(arCol == 4)
+                       						arCol = 0;
+                       					else
+                       						arCol++;
+                       					temp = "";
+                       					y++; 
+                       				}
+                       				else if(bufRes.charAt(y) == '\n') {
+                       					temp = temp.trim();
+                       					res[arRow][arCol] = temp;
+                       					arRow++;
+                       					arCol = 0;
+                       					temp = "";
+                       				}
+                       				else {
+                       					temp += bufRes.charAt(y);
+                       				}
+                       			}
+                       		}
+               				x = bufRes.length() + 1;
+                       	}
+            			else {
+            				temp = "";
             			}
-            		}
-            		else if(bufRes.charAt(x) == '[') {
-            			mark = 1;
-            			temp += bufRes.charAt(x);
-            		}
-                	//System.out.println(temp);
-            	}
-            	//System.out.println(temp);
-            	//Last line is put in list variable
-            	res[arRow][arCol] = temp;
-            	temp = "";
-            	mark = 0;
-            	
-            	for(int x = 0; x < res.length; x++) {
-            		for(int y = 0; y < res[x].length; y++) {
-            			if(res[x][y] != null)
-            				res[x][y] = res[x][y].trim();
+            			
             		}
             	}
+            	else if(bufRes.charAt(x) == '[') {
+            		mark = 1;
+            		temp += bufRes.charAt(x);
+            	}
+               	//System.out.println(temp);
             }
-            else if(opt == 1) {
-            	String temp = "";
-            	int arRow = 0;
-            	int arCol = 0;
-            	int mark = 0;
-            	for(int x = 0; x < bufRes.length(); x++) {
-            		if(mark != 0) {
-            			temp += bufRes.charAt(x);
-            			if(bufRes.charAt(x) == ']') {
-            				mark = 0;
-            				
-            				if(temp.equals("[SCHOOLS]")) {
-                        		temp = "";
-                        		int parMark = 0;
-                        		for(int y = (x + 1); y < bufRes.length(); y++) {
-                        			if(parMark == 0) {
-                        				if(bufRes.charAt(y) == '{') {
-                        					y = y + 3;
-                        					parMark = 1;
-                        				}
-                        			}
-                        			if(parMark != 0) {
-                        				if(bufRes.charAt(y) == '}') {
-                        					parMark = 0;
-                        					y = bufRes.length() + 1;
-                        				}
-                        				else if(bufRes.charAt(y) == ',') {
-                        					temp = temp.trim();
-                        					res[arRow][arCol] = temp;
-                        					if(arCol == 4)
-                        						arCol = 0;
-                        					else
-                        						arCol++;
-                        					temp = "";
-                        					y++; 
-                        				}
-                        				else if(bufRes.charAt(y) == '\n') {
-                        					temp = temp.trim();
-                        					res[arRow][arCol] = temp;
-                        					arRow++;
-                        					arCol = 0;
-                        					temp = "";
-                        				}
-                        				else {
-                        					temp += bufRes.charAt(y);
-                        				}
-                        			}
-                        		}
-                				x = bufRes.length() + 1;
-                        	}
-            				else {
-            					temp = "";
-            				}
-            				
-            			}
-            		}
-            		else if(bufRes.charAt(x) == '[') {
-            			mark = 1;
-            			temp += bufRes.charAt(x);
-            		}
-                	//System.out.println(temp);
-            	}
-            	//System.out.println(temp);
-            	//Last line is put in list variable
-            	res[arRow][arCol] = temp;
-            	temp = "";
-            	mark = 0;
-            	
-            	for(int x = 0; x < res.length; x++) {
-            		for(int y = 0; y < res[x].length; y++) {
-            			if(res[x][y] != null)
-            				res[x][y] = res[x][y].trim();
-            		}
-            	}
-            }
-            else if(opt == 2) {
-            	String temp = "";
-            	int arRow = 0;
-            	int arCol = 0;
-            	int mark = 0;
-            	for(int x = 0; x < bufRes.length(); x++) {
-            		if(mark != 0) {
-            			temp += bufRes.charAt(x);
-            			if(bufRes.charAt(x) == ']') {
-            				mark = 0;
-            				
-            				if(temp.equals("[BOOKS]")) {
-                        		temp = "";
-                        		int parMark = 0;
-                        		for(int y = (x + 1); y < bufRes.length(); y++) {
-                        			if(parMark == 0) {
-                        				if(bufRes.charAt(y) == '{') {
-                        					y = y + 3;
-                        					parMark = 1;
-                        				}
-                        			}
-                        			if(parMark != 0) {
-                        				if(bufRes.charAt(y) == '}') {
-                        					parMark = 0;
-                        					y = bufRes.length() + 1;
-                        				}
-                        				else if(bufRes.charAt(y) == ',') {
-                        					temp = temp.trim();
-                        					res[arRow][arCol] = temp;
-                        					if(arCol == 4)
-                        						arCol = 0;
-                        					else
-                        						arCol++;
-                        					temp = "";
-                        					y++; 
-                        				}
-                        				else if(bufRes.charAt(y) == '\n') {
-                        					temp = temp.trim();
-                        					res[arRow][arCol] = temp;
-                        					arRow++;
-                        					arCol = 0;
-                        					temp = "";
-                        				}
-                        				else {
-                        					temp += bufRes.charAt(y);
-                        				}
-                        			}
-                        		}
-                				x = bufRes.length() + 1;
-                        	}
-            				else {
-            					temp = "";
-            				}
-            				
-            			}
-            		}
-            		else if(bufRes.charAt(x) == '[') {
-            			mark = 1;
-            			temp += bufRes.charAt(x);
-            		}
-                	//System.out.println(temp);
-            	}
-            	//System.out.println(temp);
-            	//Last line is put in list variable
-            	res[arRow][arCol] = temp;
-            	temp = "";
-            	mark = 0;
-            	
-            	for(int x = 0; x < res.length; x++) {
-            		for(int y = 0; y < res[x].length; y++) {
-            			if(res[x][y] != null)
-            				res[x][y] = res[x][y].trim();
-            		}
+            //System.out.println(temp);
+            //Last line is put in list variable
+            res[arRow][arCol] = temp;
+            temp = "";
+            mark = 0;
+            
+            for(int x = 0; x < res.length; x++) {
+            	for(int y = 0; y < res[x].length; y++) {
+            		if(res[x][y] != null)
+            			res[x][y] = res[x][y].trim();
             	}
             }
             // Always close files.
