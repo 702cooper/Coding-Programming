@@ -26,7 +26,8 @@ public class CodingProgramming extends JFrame implements ActionListener {
 	JPanel schoolListPanel;
 	JPanel gradeListPanel;
 	JComboBox<?> sortBox;
-	JList<?> nameListList;
+	JList nameListList;
+	DefaultListModel<String> nameDLM;
 	int listValue;
 	String[] nameListSort;		
 	//Name, School, Grade, # of Books checked out, Books checked out
@@ -36,21 +37,30 @@ public class CodingProgramming extends JFrame implements ActionListener {
 	//JList<Object> nameListList;
 	//JList<Object> schoolListList;
 	//JList<Object> gradeListList;
+	String name = null;
+	String school = null;
+	String grade = null;
+	String num = null;
+	String cereal = null;
 	
 	public static void main(String[] args) {
 		new CodingProgramming();
 	}
 	
-	@SuppressWarnings({ "unchecked", "null" })
+	@SuppressWarnings({ "unchecked", "null", "rawtypes" })
 	public CodingProgramming() {
 		
 		//This is for TEST purposes
 		//REMOVE WHEN DONE
 		/*for(int x = 0; x < 15; x++) {
+			if(userList[x][0] != null)
+				System.out.println(x + 1);
 			for(int y = 0; y < userList[x].length; y++) {
-				System.out.println(userList[x][y]);
+				if(userList[x][y] != null)
+					System.out.println(userList[x][y]);
 			}
-			System.out.println("");
+			if(userList[x][0] != null)
+				System.out.println();
 		}*/
 		
 		//Creates mainFrame(window)
@@ -78,6 +88,8 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			}
 		});
 
+		nameDLM = new DefaultListModel();
+		
 		nameListPanel = new JPanel();
 		JLabel nameListLabel = new JLabel("");
 		nameListPanel.add(nameListLabel);
@@ -88,7 +100,10 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			else
 				x++;
 		}
-		nameListList = new JList<Object>(nameListSort);
+		nameListList = new JList(nameListSort);
+		//nameListList.setModel(nameDLM);
+		//for(int x = 0; x < nameListSort.length; x++)
+			//nameDLM.addElement(nameListSort[x]);
 		//listValue = (Integer) null;
 		nameListList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent event) {
@@ -170,8 +185,8 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		edit.addActionListener(this);
 	}
 
+	@SuppressWarnings({ "deprecation", "rawtypes" })
 	public void actionPerformed(ActionEvent event) {
-		@SuppressWarnings("null")
 		Object control = event.getSource();
 		if(control == sortBox) {
 			JComboBox<?> cb = (JComboBox<?>)event.getSource();
@@ -225,11 +240,6 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			
 		}
 		else if(event.getSource() == enter) {
-			String name = null;
-			String school = null;
-			String grade = null;
-			String num = null;
-			String cereal = null;
 			JTextField nameTextField = new JTextField();
 			JTextField schoolTextField = new JTextField();
 			JTextField gradeTextField = new JTextField();
@@ -243,41 +253,34 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			    "Serial of Books:", cerealTextField,
 			};
 			int option = JOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
-			if (option == JOptionPane.OK_OPTION)
-			{
+			if (option == JOptionPane.OK_OPTION) {
 			    name = nameTextField.getText();
 			    school = schoolTextField.getText();
 			    grade = gradeTextField.getText();
 			    num = numTextField.getText();
 			    cereal = cerealTextField.getText();
-				String[] newEnt = {name, school, grade, num, cereal};
-				for(int x = 0; x < newEnt.length; x++)
-					System.out.println(newEnt);
 				for(int x = 0; x < userList.length; x++) {
 					if(userList[x][0] == null) {
-						for(int y = 0; y < newEnt.length; y++)
-							userList[x][y] = newEnt[y];
-						break;
-					}
-				}
-				nameListPanel.disable();
-				nameListPanel.enable();
-			}
-			/*try {
-				String[] newEnt = {name, school, grade, num, cereal};
-				for(int x = 0; x < userList.length; x++) {
-					if(userList[x][0] == null) {
-						userList[x] = newEnt;
-						break;
+						userList[x][0] = name;
+						userList[x][1] = school;
+						userList[x][2] = grade;
+						userList[x][3] = num;
+						userList[x][4] = cereal;
+						updateList(nameListList, userList[x]);
+						x = userList.length + 1;
 					}
 				}
 			}
-			catch(NullPointerException error) {
-			}*/
+			//nameListPanel.disable();
+			//gradeListPanel.disable();
+			//schoolListPanel.disable();
+			//nameListPanel.enable();
+			//gradeListPanel.enable();
+			//schoolListPanel.enable();
 		}
 	}
 	
-	public static void fileWrite(String[][] userList, String[][] schoolList, String[][] bookList) {
+	public static void fileWrite(String[][] userListTemp, String[][] schoolListTemp, String[][] bookListTemp) {
 		// The name of the file to open.
 		String fileName = "list.txt";
 		
@@ -288,28 +291,30 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		
 		for(int x = 0; x < list.length; x++) {
 			if(uMark == false) {
+				
 				list[x] = "//Name, School, Grade, Number of Books Checked Out, Serial of Books";
 				x++;
 				list[x] = "[USERS] {";
 				x++;
-				for(int y = 0; y < userList.length; y++) {
-					if(userList[y][0] != null) {
-						for(int z = 0; z < userList[y].length; z++) {
-							if(list[x] != null && userList[y][z] != null)
-								list[x] = list[x] + userList[y][z];
+				for(int y = 0; y < userListTemp.length; y++) {
+					if(userListTemp[y][0] != null) {
+						for(int z = 0; z < userListTemp[y].length; z++) {
+							if(list[x] != null && userListTemp[y][z] != null) {
+								list[x] = list[x] + userListTemp[y][z];
+							}
 							else {
-								if(userList[y][z] != null)
-									list[x] = "	" + userList[y][z];
+								if(userListTemp[y][z] != null)
+									list[x] = "	" + userListTemp[y][z];
 							}
 							if(z < 4) {
-								if(userList[y][z + 1] != null)
+								if(userListTemp[y][z + 1] != null)
 									list[x] = list[x] + ", ";
 							}
 						}
 						x++;
 					}
 				}
-				x--;
+				//x--;
 				list[x] = "}";
 				x++;
 				uMark = true;
@@ -319,17 +324,17 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				x++;
 				list[x] = "[SCHOOLS] {";
 				x++;
-				for(int y = 0; y < schoolList.length; y++) {
-					if(schoolList[y][0] != null) {
-						for(int z = 0; z < schoolList[y].length; z++) {
-							if(list[x] != null && schoolList[y][z] != null)
-								list[x] = list[x] + schoolList[y][z];
+				for(int y = 0; y < schoolListTemp.length; y++) {
+					if(schoolListTemp[y][0] != null) {
+						for(int z = 0; z < schoolListTemp[y].length; z++) {
+							if(list[x] != null && schoolListTemp[y][z] != null)
+								list[x] = list[x] + schoolListTemp[y][z];
 							else {
-								if(schoolList[y][z] != null)
-									list[x] = "	" + schoolList[y][z];
+								if(schoolListTemp[y][z] != null)
+									list[x] = "	" + schoolListTemp[y][z];
 							}
 							if(z < 4) {
-								if(schoolList[y][z + 1] != null)
+								if(schoolListTemp[y][z + 1] != null)
 									list[x] = list[x] + ", ";
 							}
 						}
@@ -346,17 +351,17 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				x++;
 				list[x] = "[BOOKS] {";
 				x++;
-				for(int y = 0; y < bookList.length; y++) {
-					if(bookList[y][0] != null) {
-						for(int z = 0; z < bookList[y].length; z++) {
-							if(list[x] != null && bookList[y][z] != null)
-								list[x] = list[x] + bookList[y][z];
+				for(int y = 0; y < bookListTemp.length; y++) {
+					if(bookListTemp[y][0] != null) {
+						for(int z = 0; z < bookListTemp[y].length; z++) {
+							if(list[x] != null && bookListTemp[y][z] != null)
+								list[x] = list[x] + bookListTemp[y][z];
 							else {
-								if(bookList[y][z] != null)
-									list[x] = "	" + bookList[y][z];
+								if(bookListTemp[y][z] != null)
+									list[x] = "	" + bookListTemp[y][z];
 							}
 							if(z < 4) {
-								if(bookList[y][z + 1] != null)
+								if(bookListTemp[y][z + 1] != null)
 									list[x] = list[x] + ", ";
 							}
 						}
@@ -462,8 +467,10 @@ public class CodingProgramming extends JFrame implements ActionListener {
                        				else if(bufRes.charAt(y) == ',') {
                        					temp = temp.trim();
                        					res[arRow][arCol] = temp;
-                       					if(arCol == 4)
+                       					if(arCol == 4) {
                        						arCol = 0;
+                       						arRow++;
+                       					}
                        					else
                        						arCol++;
                        					temp = "";
@@ -486,18 +493,16 @@ public class CodingProgramming extends JFrame implements ActionListener {
             			else {
             				temp = "";
             			}
-            			
             		}
             	}
             	else if(bufRes.charAt(x) == '[') {
             		mark = 1;
             		temp += bufRes.charAt(x);
             	}
-               	//System.out.println(temp);
             }
-            //System.out.println(temp);
             //Last line is put in list variable
-            res[arRow][arCol] = temp;
+            if(opt != 0)
+            	res[arRow][arCol] = temp;
             temp = "";
             mark = 0;
             
@@ -550,5 +555,14 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		String[] B = Arrays.copyOf(A, j + 1);
 	 
 		return B;
+	}
+	
+	public void updateList(JList<String> list, String[] str) {
+		DefaultListModel<String> listModel = new DefaultListModel<String>();
+		listModel.clear();
+		for(int x = 0; x < str.length; x++) {
+			listModel.addElement(str[x]);
+		}
+		JList nameListList = new JList(listModel);
 	}
 }
