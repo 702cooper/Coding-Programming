@@ -25,8 +25,8 @@ public class CodingProgramming extends JFrame implements ActionListener {
 	JPanel nameListPanel;
 	JPanel schoolListPanel;
 	JPanel gradeListPanel;
-	JComboBox<?> sortBox;
-	JList nameListList;
+	JComboBox<String> sortBox;
+	JList<String> nameListList;
 	DefaultListModel<String> nameDLM;
 	int listValue;
 	String[] nameListSort;		
@@ -34,20 +34,16 @@ public class CodingProgramming extends JFrame implements ActionListener {
 	String[][] userList = fileRead(0);
 	String[][] schoolList = fileRead(1);
 	String[][] bookList = fileRead(2);
+	String[] gradeList = {("9"), ("10"), ("11"), ("12")};
 	//JList<Object> nameListList;
 	//JList<Object> schoolListList;
 	//JList<Object> gradeListList;
-	String name = null;
-	String school = null;
-	String grade = null;
-	String num = null;
-	String cereal = null;
 	
 	public static void main(String[] args) {
 		new CodingProgramming();
 	}
 	
-	@SuppressWarnings({ "unchecked", "null", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public CodingProgramming() {
 		
 		//This is for TEST purposes
@@ -93,24 +89,26 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		nameListPanel = new JPanel();
 		JLabel nameListLabel = new JLabel("");
 		nameListPanel.add(nameListLabel);
-		nameListSort = new String[userList.length];
+		int mark = 0;
 		for(int x = 0; x < userList.length; x++) {
 			if(userList[x][0] != null)
-				nameListSort[x] = userList[x][0];
-			else
-				x++;
+				mark++;
 		}
-		nameListList = new JList(nameListSort);
-		//nameListList.setModel(nameDLM);
-		//for(int x = 0; x < nameListSort.length; x++)
-			//nameDLM.addElement(nameListSort[x]);
+		nameListSort = new String[mark];
+		for(int x = 0; x < nameListSort.length; x++) {
+			if(userList[x][0] != null)
+				nameListSort[x] = userList[x][0];
+		}
+		nameListList = new JList(nameDLM);
+		for(int x = 0; x < nameListSort.length; x++)
+			nameDLM.addElement(nameListSort[x]);
 		//listValue = (Integer) null;
 		nameListList.addListSelectionListener(new ListSelectionListener() {
+			@Override
 			public void valueChanged(ListSelectionEvent event) {
-				if(event.getValueIsAdjusting())
-					listValue = event.getFirstIndex();
-				System.out.println("Selected from " + event.getFirstIndex() + " to " + event.getLastIndex());
-				return;
+				JList list = (JList) event.getSource();
+				listValue = list.getSelectedIndex();
+				
 			}
 		});
 		nameListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -119,6 +117,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		mainFrame.add(nameListPanel);
 		nameListPanel.setVisible(true);
 		
+		//Add schoolDLM
 		schoolListPanel = new JPanel();
 		JLabel schoolListLabel = new JLabel("");
 		schoolListPanel.add(schoolListLabel);
@@ -131,8 +130,6 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		for(int x = 0; x < temp.length; x++) {
 			schoolListSort[x] = temp[x];
 		}
-		//for(int x = 0; x < 5; x++)
-			//System.out.println(schoolListSort[x]);
 		JList<?> schoolListList = new JList<Object>(schoolListSort);
 		schoolListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JScrollPane schoolListScroll = new JScrollPane(schoolListList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -159,7 +156,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		JLabel sortList = new JLabel("Sort By");
 		sortListPanel.add(sortList);
 		String[] sort = {"Name", "School", "Grade"};
-		sortBox = new JComboBox<Object>(sort);
+		sortBox = new JComboBox<String>(sort);
 		sortBox.addActionListener(this);
 		
 		sortListPanel.add(sortBox);
@@ -185,7 +182,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		edit.addActionListener(this);
 	}
 
-	@SuppressWarnings({ "deprecation", "rawtypes" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void actionPerformed(ActionEvent event) {
 		Object control = event.getSource();
 		if(control == sortBox) {
@@ -240,43 +237,73 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			
 		}
 		else if(event.getSource() == enter) {
-			JTextField nameTextField = new JTextField();
-			JTextField schoolTextField = new JTextField();
-			JTextField gradeTextField = new JTextField();
-			JTextField numTextField = new JTextField();
-			JTextField cerealTextField = new JTextField();
-			Object[] message = {
-			    "Name:", nameTextField,
-			    "School:", schoolTextField,
-			    "Grade:", gradeTextField,
-			    "Number of Books Checked Out:", numTextField,
-			    "Serial of Books:", cerealTextField,
-			};
-			int option = JOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
-			if (option == JOptionPane.OK_OPTION) {
-			    name = nameTextField.getText();
-			    school = schoolTextField.getText();
-			    grade = gradeTextField.getText();
-			    num = numTextField.getText();
-			    cereal = cerealTextField.getText();
-				for(int x = 0; x < userList.length; x++) {
-					if(userList[x][0] == null) {
-						userList[x][0] = name;
-						userList[x][1] = school;
-						userList[x][2] = grade;
-						userList[x][3] = num;
-						userList[x][4] = cereal;
-						updateList(nameListList, userList[x]);
-						x = userList.length + 1;
+			if(nameListPanel.isVisible()) {
+				String name = null;
+				String school = null;
+				String grade = null;
+				String num = null;
+				String cereal = null;
+				JTextField nameTextField = new JTextField();
+				
+				//schoolComboBox array setup
+				int mark = 0;
+				for(int x = 0; x < schoolList.length; x++) {
+					if(schoolList[x][0] != null)
+						mark++;
+				}
+				String[] schoolListSort = new String[mark];
+				for(int x = 0; x < schoolListSort.length; x++) {
+					if(schoolList[x][0] != null)
+						schoolListSort[x] = schoolList[x][0];
+				}
+				JComboBox schoolComboBox = new JComboBox(schoolListSort);
+				
+				JComboBox gradeComboBox = new JComboBox(gradeList);
+				JTextField numTextField = new JTextField();
+				JTextField cerealTextField = new JTextField();
+				Object[] message = {
+					"Name:", nameTextField,
+			    	"School:", schoolComboBox,
+			    	"Grade:", gradeComboBox,
+			    	"Number of Books Checked Out:", numTextField,
+			    	"Serial of Books:", cerealTextField,
+				};
+				int option = JOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
+				if (option == JOptionPane.OK_OPTION) {
+			    	name = nameTextField.getText();
+			    	school = schoolList[(schoolComboBox.getSelectedIndex())][0];
+			    	grade = gradeList[(gradeComboBox.getSelectedIndex())];
+			    	num = numTextField.getText();
+			    	cereal = cerealTextField.getText();
+					for(int x = 0; x < userList.length; x++) {
+						if(userList[x][0] == null) {
+							userList[x][0] = name;
+							userList[x][1] = school;
+							userList[x][2] = grade;
+							userList[x][3] = num;
+							userList[x][4] = cereal;
+							nameDLM.addElement(userList[x][0]);
+							nameListPanel.validate();
+							nameListPanel.repaint();
+							x = userList.length + 1;
+						}
 					}
 				}
 			}
-			//nameListPanel.disable();
-			//gradeListPanel.disable();
-			//schoolListPanel.disable();
-			//nameListPanel.enable();
-			//gradeListPanel.enable();
-			//schoolListPanel.enable();
+			else if(schoolListPanel.isVisible()) {
+				String school = null;
+				JTextField schoolTextField = new JTextField();
+				Object[] message = {
+						"School Name:", schoolTextField
+				};
+				int option = JOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
+				if(option == JOptionPane.OK_OPTION) {
+					school = schoolTextField.getText();
+				}
+			}
+			else if(gradeListPanel.isVisible()) {
+				
+			}
 		}
 	}
 	
@@ -314,7 +341,6 @@ public class CodingProgramming extends JFrame implements ActionListener {
 						x++;
 					}
 				}
-				//x--;
 				list[x] = "}";
 				x++;
 				uMark = true;
@@ -341,7 +367,6 @@ public class CodingProgramming extends JFrame implements ActionListener {
 						x++;
 					}
 				}
-				x--;
 				list[x] = "}";
 				x++;
 				sMark = true;
@@ -368,7 +393,6 @@ public class CodingProgramming extends JFrame implements ActionListener {
 						x++;
 					}
 				}
-				x--;
 				list[x] = "}";
 				x++;
 				bMark = true;
@@ -501,8 +525,8 @@ public class CodingProgramming extends JFrame implements ActionListener {
             	}
             }
             //Last line is put in list variable
-            if(opt != 0)
-            	res[arRow][arCol] = temp;
+            //if(opt != 0)
+            	//res[arRow][arCol] = temp;
             temp = "";
             mark = 0;
             
@@ -555,14 +579,5 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		String[] B = Arrays.copyOf(A, j + 1);
 	 
 		return B;
-	}
-	
-	public void updateList(JList<String> list, String[] str) {
-		DefaultListModel<String> listModel = new DefaultListModel<String>();
-		listModel.clear();
-		for(int x = 0; x < str.length; x++) {
-			listModel.addElement(str[x]);
-		}
-		JList nameListList = new JList(listModel);
 	}
 }

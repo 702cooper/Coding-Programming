@@ -5,7 +5,8 @@
 	Steve, Las Vegas, 9, 2, 987;879
 	Jupiter, Arbor View, 12, 5, 001;214;268;297;284
 	Harold, Arbor View, 12, 1, 002
-	Bob, Bob, 11, 11, 11
+	Bob, Las Vegas, 10, 11, 11
+	Hannah, Arbor View, 12, 1, 001
 }
 //School Name
 [SCHOOLS] {
