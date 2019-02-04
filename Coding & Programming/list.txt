@@ -1,19 +1,18 @@
 //Name, School, Grade, Number of Books Checked Out, Serial of Books
 [USERS] {
-	Marci, Arbor View, 10, 2, 004
+	Marci, Arbor View High School, 10, 2, 004
 	Phil, Shadow Ridge, 11, 1, 003;004
 	Steve, Las Vegas, 9, 2, 987;879
-	Jupiter, Arbor View, 12, 5, 001;214;268;297;284
-	Harold, Arbor View, 12, 1, 002
-	Bob, Las Vegas, 10, 11, 11
-	Hannah, Arbor View, 12, 1, 001
+	Jupiter, Arbor View High School, 12, 5, 001;214;268;297;284
+	Hannah, Arbor View High School, 12, 1, 001
 }
 //School Name
 [SCHOOLS] {
-	Arbor View
+	Arbor View High School
 	Shadow Ridge
 	Las Vegas
 	The Meadows
+	Centennial
 }
 //Serial Number, Book Name, Author, Number in Stock
 [BOOKS] {
@@ -30,7 +29,6 @@
 }
 //Grades
 [GRADES] {
-	Pre-K
 	2
 	6
 	7

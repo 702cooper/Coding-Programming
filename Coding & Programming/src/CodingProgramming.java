@@ -16,12 +16,15 @@ import javax.swing.event.ListSelectionListener;
 
 public class CodingProgramming extends JFrame implements ActionListener {
 	//static final int LIMIT = (2147483647 - 8) / 5;
-	
+	JFrame mainFrame;
+	JPanel mainPanel;
 	//add JButtons here
 	JPanel buttons;
 	JButton enter;
 	JButton view;
 	JButton edit;
+	JOptionPane editOptionPane;
+	JButton delete;
 	JPanel nameListPanel;
 	JPanel schoolListPanel;
 	JPanel gradeListPanel;
@@ -31,19 +34,19 @@ public class CodingProgramming extends JFrame implements ActionListener {
 	JList<String> gradeListList;
 	DefaultListModel<String> nameDLM;
 	DefaultListModel<String> schoolDLM;
+	DefaultListModel<String> schoolSortDLM;
 	DefaultListModel<String> gradeDLM;
+	DefaultListModel<String> gradeSortDLM;
 	int nameListValue;
 	int schoolListValue;
 	int gradeListValue;
-	String[] nameListSort;		
+	String[] nameListSort;
 	//Name, School, Grade, # of Books checked out, Books checked out
 	String[][] userList = fileRead(0);
 	String[][] schoolList = fileRead(1);
 	String[][] bookList = fileRead(2);
 	String[][] gradeList = fileRead(3);
-	//JList<Object> nameListList;
-	//JList<Object> schoolListList;
-	//JList<Object> gradeListList;
+	boolean enterCheck = false;
 	
 	public static void main(String[] args) {
 		new CodingProgramming();
@@ -66,10 +69,10 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		}*/
 		
 		//Creates mainFrame(window)
-		JFrame mainFrame = new JFrame();
+		mainFrame = new JFrame();
 		mainFrame.setTitle("E-Book Library");
 		mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		JPanel mainPanel = (JPanel)mainFrame.getContentPane();
+		mainPanel = (JPanel)mainFrame.getContentPane();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		mainFrame.addWindowListener(new WindowAdapter() {
@@ -77,13 +80,19 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			
 			@Override
 			public void windowClosing(WindowEvent e) {
-				int options = JOptionPane.showConfirmDialog(mainFrame, "Save Before Quitting?");
-				if(options == JOptionPane.YES_OPTION){
-					fileWrite(userList, schoolList, bookList, gradeList);
-					mainFrame.setVisible(false);
-					mainFrame.dispose();
+				if(enterCheck) {
+					int options = JOptionPane.showConfirmDialog(mainFrame, "Save Before Quitting?");
+					if(options == JOptionPane.YES_OPTION){
+						fileWrite(userList, schoolList, bookList, gradeList);
+						mainFrame.setVisible(false);
+						mainFrame.dispose();
+					}
+					else if(options == JOptionPane.NO_OPTION) {
+						mainFrame.setVisible(false);
+						mainFrame.dispose();
+					}
 				}
-				else if(options == JOptionPane.NO_OPTION) {
+				else {
 					mainFrame.setVisible(false);
 					mainFrame.dispose();
 				}
@@ -144,12 +153,13 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			if(schoolListSort[x] != null)
 				schoolDLM.addElement(schoolListSort[x]);
 		}
+		schoolSortDLM = schoolDLM;
 		schoolListList.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent event) {
 				JList list = (JList) event.getSource();
 				schoolListValue = list.getSelectedIndex();
-				
+				System.out.println(schoolListValue);
 			}
 		});
 		schoolListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -198,9 +208,6 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		enter = new JButton("Enter");
 		view = new JButton("View");
 		edit = new JButton("Edit");
-		//buttonGroup.add(enter);
-		//buttonGroup.add(view);
-		//buttonGroup.add(edit);
 		buttons.add(enter);
 		buttons.add(view);
 		buttons.add(edit);
@@ -226,6 +233,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				schoolListPanel.setVisible(false);
 				gradeListPanel.setVisible(false);
 				nameListPanel.setVisible(true);
+				schoolDLM = schoolSortDLM;
 			}	
 			else if(typeSort == 1) {
 				nameListPanel.setVisible(false);
@@ -236,6 +244,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				nameListPanel.setVisible(false);
 				schoolListPanel.setVisible(false);
 				gradeListPanel.setVisible(true);
+				schoolDLM = schoolSortDLM;
 			}
 			//System.out.println("Selected from " + event.getStateChange());
 		}
@@ -258,13 +267,183 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				//Name, School, Grade, # of Books checked out, Books checked out
 			}
 			else if(schoolListPanel.isVisible()) {
-				//Make this thing here
+				schoolSortDLM = schoolDLM;
+				schoolDLM.clear();
+				for(int x = 0; x < userList.length; x++) {
+					if(userList[x][2] != null) {
+						if(userList[x][1].equals(schoolList[schoolListValue][0])) {
+							schoolDLM.addElement(userList[x][2]);
+						}
+					}
+				}
+				schoolListPanel.validate();
+				schoolListPanel.repaint();
 			}
 		}
-		else if(event.getSource() == edit) {
-			
+		else if(control == edit) {
+			enterCheck = true;
+			editOptionPane = new JOptionPane();
+			if(nameListPanel.isVisible()) {
+				String name = null;
+				String school = null;
+				String grade = null;
+				String num = null;
+				String cereal = null;
+				JTextField nameTextField = new JTextField(userList[nameListValue][0]);
+				
+				//schoolComboBox array setup
+				int mark = 0;
+				for(int x = 0; x < schoolList.length; x++) {
+					if(schoolList[x][0] != null)
+						mark++;
+				}
+				String[] schoolListSort = new String[mark];
+				for(int x = 0; x < schoolListSort.length; x++) {
+					if(schoolList[x][0] != null)
+						schoolListSort[x] = schoolList[x][0];
+				}
+				JComboBox schoolComboBox = new JComboBox(schoolListSort);
+				mark = 0;
+				for(int x = 0; x < userList.length; x++) {
+					mark++;
+					if(userList[nameListValue][1].equals(schoolListSort[x])) {
+						mark--;
+						x = userList.length + 1;
+					}
+				}
+				schoolComboBox.setSelectedIndex(mark);
+				
+				//gradeComboBox array setup
+				mark = 0;
+				for(int x = 0; x < gradeList.length; x++) {
+					if(gradeList[x][0] != null)
+						mark++;
+				}
+				String[] gradeListSort = new String[mark];
+				for(int x = 0; x < gradeListSort.length; x++) {
+					if(gradeListSort != null)
+						gradeListSort[x] = gradeList[x][0];
+				}
+				JComboBox gradeComboBox = new JComboBox(gradeListSort);
+				mark = 0;
+				for(int x = 0; x < gradeListSort.length; x++) {
+					mark++;
+					if(userList[nameListValue][2].equals(gradeListSort[x])) {
+						mark--;
+						x = userList.length + 1;
+					}
+				}
+				gradeComboBox.setSelectedIndex(mark);
+				
+				JTextField numTextField = new JTextField(userList[nameListValue][3]);
+				JTextField cerealTextField = new JTextField(userList[nameListValue][4]);
+				delete = new JButton("Delete");
+				delete.addActionListener(this);
+				Object[] message = {
+					"Name:", nameTextField,
+			    	"School:", schoolComboBox,
+			    	"Grade:", gradeComboBox,
+			    	"Number of Books Checked Out:", numTextField,
+			    	"Serial of Books:", cerealTextField,
+			    	delete
+				};
+				int option = editOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
+				if (option == JOptionPane.OK_OPTION) {
+			    	name = nameTextField.getText();
+			    	school = schoolList[(schoolComboBox.getSelectedIndex())][0];
+			    	grade = gradeList[(gradeComboBox.getSelectedIndex())][0];
+			    	num = numTextField.getText();
+			    	cereal = cerealTextField.getText();
+					userList[nameListValue][0] = name;
+					userList[nameListValue][1] = school;
+					userList[nameListValue][2] = grade;
+					userList[nameListValue][3] = num;
+					userList[nameListValue][4] = cereal;
+					nameDLM.add(nameListValue, userList[nameListValue][0]);
+					nameDLM.removeElementAt(nameListValue);
+					nameListPanel.validate();
+					nameListPanel.repaint();
+				}
+			}
+			else if(schoolListPanel.isVisible()) {
+				String school = null;
+				JTextField schoolTextField = new JTextField(schoolList[schoolListValue][0]);
+				
+				Object[] message = {
+						"School:", schoolTextField
+				};
+				int option = editOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
+				if (option == JOptionPane.OK_OPTION) {
+					school = schoolTextField.getText();
+					
+					for(int x = 0; x < userList.length; x++) {
+						if(userList[x][1] != null) {
+							if(userList[x][1].equals(schoolList[schoolListValue][0])) {
+								userList[x][1] = school;
+							}
+						}
+					}
+					
+					schoolList[schoolListValue][0] = school;
+					schoolDLM.add(schoolListValue, schoolList[schoolListValue][0]);
+					schoolDLM.removeElementAt(schoolListValue);
+					schoolListPanel.validate();
+					schoolListPanel.repaint();
+				}
+			}
+			else if(gradeListPanel.isVisible()) {
+				String school = null;
+				JTextField schoolTextField = new JTextField();
+				Object[] message = {
+						"School Name:", schoolTextField
+				};
+				int option = editOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
+				if(option == JOptionPane.OK_OPTION) {
+					school = schoolTextField.getText();
+					for(int x = 0; x < schoolList.length; x++) {
+						if(schoolList[x][0] == null) {
+							schoolList[x][0] = school;
+							schoolDLM.addElement(schoolList[x][0]);
+							schoolListPanel.validate();
+							schoolListPanel.repaint();
+							x = schoolList.length + 1;
+						}
+					}
+				}
+			}
 		}
-		else if(event.getSource() == enter) {
+		if(control == delete) {
+			if(nameListPanel.isVisible()) {
+				Object[] warningMessage = {
+						"Are you sure you want to delete this user?"
+				};
+				int option = JOptionPane.showConfirmDialog(null, warningMessage, "Warning", JOptionPane.YES_NO_OPTION);
+				if(option == JOptionPane.YES_OPTION) {
+					for(int x = 0; x < userList[nameListValue].length; x++)
+						userList[nameListValue][x] = null;
+					
+					for(int x = 0; x < userList.length; x++) {
+						if((x + 1) < userList.length) {
+							if(userList[x][0] == null && userList[x+1][0] != null) {
+								for(int y = 0; y < userList[x].length; y++) {
+									userList[x][y] = userList[x+1][y];
+									userList[x+1][y] = null;
+								}
+							}
+						}
+					}
+					editOptionPane.getRootFrame().dispose();
+					nameDLM.removeElementAt(nameListValue);
+					nameListPanel.validate();
+					nameListPanel.repaint();
+				}
+			}
+			else if(gradeListPanel.isVisible()) {
+				//add grade delete and others
+			}
+		}
+		else if(control == enter) {
+			enterCheck = true;
 			if(nameListPanel.isVisible()) {
 				String name = null;
 				String school = null;
@@ -286,6 +465,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				}
 				JComboBox schoolComboBox = new JComboBox(schoolListSort);
 				
+				//gradeComboBox array setup
 				mark = 0;
 				for(int x = 0; x < gradeList.length; x++) {
 					if(gradeList[x][0] != null)
@@ -297,6 +477,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 						gradeListSort[x] = gradeList[x][0];
 				}
 				JComboBox gradeComboBox = new JComboBox(gradeListSort);
+				
 				JTextField numTextField = new JTextField();
 				JTextField cerealTextField = new JTextField();
 				Object[] message = {
