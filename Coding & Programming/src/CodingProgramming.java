@@ -159,7 +159,6 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			public void valueChanged(ListSelectionEvent event) {
 				JList list = (JList) event.getSource();
 				schoolListValue = list.getSelectedIndex();
-				System.out.println(schoolListValue);
 			}
 		});
 		schoolListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -304,7 +303,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				}
 				JComboBox schoolComboBox = new JComboBox(schoolListSort);
 				mark = 0;
-				for(int x = 0; x < userList.length; x++) {
+				for(int x = 0; x < schoolListSort.length; x++) {
 					mark++;
 					if(userList[nameListValue][1].equals(schoolListSort[x])) {
 						mark--;
@@ -368,9 +367,11 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			else if(schoolListPanel.isVisible()) {
 				String school = null;
 				JTextField schoolTextField = new JTextField(schoolList[schoolListValue][0]);
-				
+				delete = new JButton("Delete");
+				delete.addActionListener(this);
 				Object[] message = {
-						"School:", schoolTextField
+						"School:", schoolTextField,
+						delete
 				};
 				int option = editOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
 				if (option == JOptionPane.OK_OPTION) {
@@ -392,21 +393,68 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				}
 			}
 			else if(gradeListPanel.isVisible()) {
-				String school = null;
-				JTextField schoolTextField = new JTextField();
+				String grade = null;
+				String[] gradeSelections = new String[14];
+				for(int x = 0; x < gradeSelections.length; x++) {
+					int mark = 0;
+					String temp = null;
+					if(x == 0)
+						temp = "Pre-K";
+					else if(x == 1)
+						temp = "Kinder";
+					else if(x >= 2)
+						temp = (Integer.toString(x - 1));
+					
+					for(int y = 0; y < gradeList.length; y++) {
+						if(gradeList[y][0] != null) {
+							if(gradeList[y][0].equals(temp))
+								mark++;
+						}
+					}
+					if(mark == 0) {
+						gradeSelections[x] = temp;
+					}
+				}
+				gradeSelections[Integer.parseInt(gradeList[gradeListValue][0])] = gradeList[gradeListValue][0];
+				for(int x = 0; x < gradeSelections.length; x++) {
+					if((x + 1) < gradeSelections.length) {
+						if(gradeSelections[x] == null && gradeSelections[x + 1] != null) {
+							gradeSelections[x] = gradeSelections[x + 1];
+							gradeSelections[x + 1] = null;
+							x = 0;
+						}
+					}
+				}
+				
+				int mark = 0;
+				for(int x = 0; x < gradeSelections.length; x++) {
+					if(gradeSelections[x] != null)
+						mark++;
+				}
+				String[] gradeSelectionsSort = new String[mark];
+				for(int x = 0; x < gradeSelectionsSort.length; x++) {
+					if(gradeSelections[x] != null)
+						gradeSelectionsSort[x] = gradeSelections[x];
+				}
+				
+				JComboBox gradeComboBox = new JComboBox(gradeSelectionsSort);
+				delete = new JButton("Delete");
+				delete.addActionListener(this);
 				Object[] message = {
-						"School Name:", schoolTextField
+						"Grade:", gradeComboBox,
+						delete
 				};
 				int option = editOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
 				if(option == JOptionPane.OK_OPTION) {
-					school = schoolTextField.getText();
-					for(int x = 0; x < schoolList.length; x++) {
-						if(schoolList[x][0] == null) {
-							schoolList[x][0] = school;
-							schoolDLM.addElement(schoolList[x][0]);
-							schoolListPanel.validate();
-							schoolListPanel.repaint();
-							x = schoolList.length + 1;
+					grade = gradeSelectionsSort[gradeComboBox.getSelectedIndex()];
+					for(int x = 0; x < gradeList.length; x++) {
+						if(gradeList[x][0] == null) {
+							gradeList[x][0] = grade;
+							//Sort and remove
+							gradeDLM.addElement(gradeList[x][0]);
+							gradeListPanel.validate();
+							gradeListPanel.repaint();
+							x = gradeList.length + 1;
 						}
 					}
 				}
@@ -424,10 +472,10 @@ public class CodingProgramming extends JFrame implements ActionListener {
 					
 					for(int x = 0; x < userList.length; x++) {
 						if((x + 1) < userList.length) {
-							if(userList[x][0] == null && userList[x+1][0] != null) {
+							if(userList[x][0] == null && userList[x + 1][0] != null) {
 								for(int y = 0; y < userList[x].length; y++) {
-									userList[x][y] = userList[x+1][y];
-									userList[x+1][y] = null;
+									userList[x][y] = userList[x + 1][y];
+									userList[x + 1][y] = null;
 								}
 							}
 						}
@@ -438,8 +486,56 @@ public class CodingProgramming extends JFrame implements ActionListener {
 					nameListPanel.repaint();
 				}
 			}
+			else if(schoolListPanel.isVisible()) {
+				Object[] warningMessage = {
+						"Are you sure you want to delete this school?"
+				};
+				int option = JOptionPane.showConfirmDialog(null, warningMessage, "Warning", JOptionPane.YES_NO_OPTION);
+				if(option == JOptionPane.YES_OPTION) {
+					for(int x = 0; x < userList.length; x++) {
+						if(userList[x][1] != null) {
+							if(userList[x][1] == schoolList[schoolListValue][0]) {
+								userList[x][1] = schoolList[0][0];
+							}
+						}
+					}
+					
+					schoolList[schoolListValue][0] = null;
+					for(int x = 0; x < schoolList.length; x++) {
+						if((x + 1) < schoolList.length) {
+							if(schoolList[x][0] == null && schoolList[x + 1][0] != null) {
+								schoolList[x][0] = schoolList[x + 1][0];
+								schoolList[x + 1][0] = null;
+							}
+						}
+					}
+					editOptionPane.getRootFrame().dispose();
+					schoolDLM.removeElementAt(schoolListValue);
+					schoolListPanel.validate();
+					schoolListPanel.repaint();
+				}
+			}
 			else if(gradeListPanel.isVisible()) {
-				//add grade delete and others
+				Object[] warningMessage = {
+						"Are you sure you want to delete this grade?"
+				};
+				int option = JOptionPane.showConfirmDialog(null, warningMessage, "Warning", JOptionPane.YES_NO_OPTION);
+				if(option == JOptionPane.YES_OPTION) {
+					gradeList[gradeListValue][0] = null;
+					
+					for(int x = 0; x < gradeList.length; x++) {
+						if((x + 1) < gradeList.length) {
+							if(gradeList[x][0] == null && gradeList[x + 1][0] != null) {
+								gradeList[x][0] = gradeList[x + 1][0];
+								gradeList[x + 1][0] = null;
+							}
+						}
+					}
+					editOptionPane.getRootFrame().dispose();
+					gradeDLM.removeElementAt(gradeListValue);
+					gradeListPanel.validate();
+					gradeListPanel.repaint();
+				}
 			}
 		}
 		else if(control == enter) {
@@ -543,16 +639,37 @@ public class CodingProgramming extends JFrame implements ActionListener {
 						temp = (Integer.toString(x - 1));
 					
 					for(int y = 0; y < gradeList.length; y++) {
-						if(gradeList[y][0] == temp)
-							mark++;
+						if(gradeList[y][0] != null) {
+							if(gradeList[y][0].equals(temp))
+								mark++;
+						}
 					}
 					if(mark == 0) {
 						gradeSelections[x] = temp;
 					}
-					else
-						x--;
 				}
-				JComboBox gradeComboBox = new JComboBox(gradeSelections);
+				for(int x = 0; x < gradeSelections.length; x++) {
+					if((x + 1) < gradeSelections.length) {
+						if(gradeSelections[x] == null && gradeSelections[x + 1] != null) {
+							gradeSelections[x] = gradeSelections[x + 1];
+							gradeSelections[x + 1] = null;
+							x = 0;
+						}
+					}
+				}
+				
+				int mark = 0;
+				for(int x = 0; x < gradeSelections.length; x++) {
+					if(gradeSelections[x] != null)
+						mark++;
+				}
+				String[] gradeSelectionsSort = new String[mark];
+				for(int x = 0; x < gradeSelectionsSort.length; x++) {
+					if(gradeSelections[x] != null)
+						gradeSelectionsSort[x] = gradeSelections[x];
+				}
+				
+				JComboBox gradeComboBox = new JComboBox(gradeSelectionsSort);
 				Object[] message = {
 						"Grade: ", gradeComboBox
 				};
@@ -563,7 +680,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 						if(gradeList[x][0] == null) {
 							gradeList[x][0] = grade;
 							
-							int mark = 0;
+							mark = 0;
 							for(int y = 0; y < gradeList.length; y++) {
 								if(gradeList[y][0] != null)
 									mark++;
