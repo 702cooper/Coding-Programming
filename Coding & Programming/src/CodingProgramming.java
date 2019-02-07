@@ -10,10 +10,6 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-//READ THESE
-//Figure out view and stuff
-//make fileWrite run when closed
-
 public class CodingProgramming extends JFrame implements ActionListener {
 	//static final int LIMIT = (2147483647 - 8) / 5;
 	JFrame mainFrame;
@@ -35,6 +31,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 	DefaultListModel<String> nameDLM;
 	DefaultListModel<String> schoolDLM;
 	DefaultListModel<String> schoolSortDLM;
+	boolean schoolView = false;
 	DefaultListModel<String> gradeDLM;
 	DefaultListModel<String> gradeSortDLM;
 	int nameListValue;
@@ -123,7 +120,6 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			public void valueChanged(ListSelectionEvent event) {
 				JList list = (JList) event.getSource();
 				nameListValue = list.getSelectedIndex();
-				
 			}
 		});
 		nameListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -220,7 +216,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		edit.addActionListener(this);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked", "static-access" })
 	public void actionPerformed(ActionEvent event) {
 		Object control = event.getSource();
 		if(control == sortBox) {
@@ -266,17 +262,53 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				//Name, School, Grade, # of Books checked out, Books checked out
 			}
 			else if(schoolListPanel.isVisible()) {
-				schoolSortDLM = schoolDLM;
-				schoolDLM.clear();
+				schoolView = true;
+				String[] schoolUserList = new String[userList.length];
 				for(int x = 0; x < userList.length; x++) {
-					if(userList[x][2] != null) {
-						if(userList[x][1].equals(schoolList[schoolListValue][0])) {
-							schoolDLM.addElement(userList[x][2]);
+					if(userList[x][0] != null) {
+						if(userList[x][0] == schoolList[schoolListValue][0])
+							schoolUserList[x] = userList[x][0];
+					}
+				}
+				for(int x = 0; x < schoolUserList.length; x++) {
+					if((x + 1) < schoolUserList.length) {
+						if(schoolUserList[x] == null && schoolUserList[x + 1] != null) {
+							schoolUserList[x] = schoolUserList[x + 1];
+							schoolUserList[x + 1] = null;
+							x = 0;
 						}
 					}
 				}
-				schoolListPanel.validate();
-				schoolListPanel.repaint();
+				
+				int mark = 0;
+				for(int x = 0; x < schoolUserList.length; x++) {
+					if(schoolUserList[x] != null)
+						mark++;
+				}
+				String[] schoolUserListSort = new String[mark];
+				for(int x = 0; x < schoolUserListSort.length; x++) {
+					if(schoolUserList[x] != null)
+						schoolUserListSort[x] = schoolUserList[x];
+				}
+				
+				DefaultListModel schoolSortDLM = new DefaultListModel();
+				for(int x = 0; x < schoolUserListSort.length; x++)
+					schoolSortDLM.addElement(schoolUserListSort[x]);
+				JList schoolUserListList = new JList(schoolSortDLM);
+				
+				JPanel schoolUserPanel = new JPanel();
+				JLabel schoolUserLabel = new JLabel(schoolList[schoolListValue][0]);
+				schoolUserPanel.add(schoolUserLabel);
+				
+				schoolUserPanel.add(schoolUserListList);
+				schoolUserListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+				JScrollPane schoolUserListScroll = new JScrollPane(schoolUserListList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+				schoolUserPanel.add(schoolUserListScroll);
+				mainFrame.add(schoolUserPanel);
+				schoolListPanel.setVisible(false);
+				schoolUserPanel.setVisible(true);
+				
+				//Figure out why it won't show
 			}
 		}
 		else if(control == edit) {
@@ -438,6 +470,8 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				}
 				
 				JComboBox gradeComboBox = new JComboBox(gradeSelectionsSort);
+				gradeComboBox.setSelectedItem(gradeList[gradeListValue][0]);
+				
 				delete = new JButton("Delete");
 				delete.addActionListener(this);
 				Object[] message = {
@@ -450,8 +484,50 @@ public class CodingProgramming extends JFrame implements ActionListener {
 					for(int x = 0; x < gradeList.length; x++) {
 						if(gradeList[x][0] == null) {
 							gradeList[x][0] = grade;
-							//Sort and remove
-							gradeDLM.addElement(gradeList[x][0]);
+							
+							mark = 0;
+							for(int y = 0; y < gradeList.length; y++) {
+								if(gradeList[y][0] != null)
+									mark++;
+							}
+							String[] gradeListSort = new String[mark];
+							for(int y = 0; y < gradeListSort.length; y++) {
+								if(gradeList[y][0] != null)
+									gradeListSort[y] = gradeList[y][0];
+							}
+							
+							for(int y = 0; y < gradeListSort.length; y++) {
+								if(!isInteger(gradeListSort[y])) {
+									if(y != 0) {
+										String temp = gradeListSort[y - 1];
+										gradeListSort[y - 1] = gradeListSort[y];
+										gradeListSort[y] = temp;
+										temp = "";
+										y = 0;
+									}
+								}
+								else if(y != gradeListSort.length && y != gradeListSort.length - 1) {
+									if(isInteger(gradeListSort[y]) && isInteger(gradeListSort[y + 1]) && 
+											Integer.parseInt(gradeListSort[y]) > Integer.parseInt(gradeListSort[y + 1])) {
+										String temp = gradeListSort[y + 1];
+										gradeListSort[y + 1] = gradeListSort[y];
+										gradeListSort[y] = temp;
+										temp = "";
+										y = 0;
+									}
+								}
+							}
+							
+							for(int y = 0; y < gradeListSort.length; y++) {
+								if(gradeListSort != null)
+									gradeList[y][0] = gradeListSort[y];
+							}
+							
+							gradeDLM.clear();
+							for(int y = 0; y < gradeListSort.length; y++) {
+								if(gradeListSort[y] != null)
+									gradeDLM.addElement(gradeListSort[y]);
+							}
 							gradeListPanel.validate();
 							gradeListPanel.repaint();
 							x = gradeList.length + 1;

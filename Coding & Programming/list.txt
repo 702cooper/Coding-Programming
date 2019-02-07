@@ -26,7 +26,6 @@
 }
 //Grades
 [GRADES] {
-	2
 	6
 	7
 	8
