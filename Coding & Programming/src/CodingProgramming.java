@@ -262,20 +262,24 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				//Name, School, Grade, # of Books checked out, Books checked out
 			}
 			else if(schoolListPanel.isVisible()) {
-				schoolView = true;
+				JOptionPane schoolUserOptionPane = new JOptionPane();
+				JList schoolUserListList;
+				JButton schoolUserView;
+				
 				String[] schoolUserList = new String[userList.length];
 				for(int x = 0; x < userList.length; x++) {
 					if(userList[x][0] != null) {
-						if(userList[x][0] == schoolList[schoolListValue][0])
+						if(userList[x][1].equals(schoolList[schoolListValue][0]))
 							schoolUserList[x] = userList[x][0];
 					}
 				}
+				
 				for(int x = 0; x < schoolUserList.length; x++) {
 					if((x + 1) < schoolUserList.length) {
 						if(schoolUserList[x] == null && schoolUserList[x + 1] != null) {
 							schoolUserList[x] = schoolUserList[x + 1];
 							schoolUserList[x + 1] = null;
-							x = 0;
+							x = -1;
 						}
 					}
 				}
@@ -291,24 +295,19 @@ public class CodingProgramming extends JFrame implements ActionListener {
 						schoolUserListSort[x] = schoolUserList[x];
 				}
 				
-				DefaultListModel schoolSortDLM = new DefaultListModel();
-				for(int x = 0; x < schoolUserListSort.length; x++)
-					schoolSortDLM.addElement(schoolUserListSort[x]);
-				JList schoolUserListList = new JList(schoolSortDLM);
-				
-				JPanel schoolUserPanel = new JPanel();
-				JLabel schoolUserLabel = new JLabel(schoolList[schoolListValue][0]);
-				schoolUserPanel.add(schoolUserLabel);
-				
-				schoolUserPanel.add(schoolUserListList);
+				schoolUserListList = new JList(schoolUserListSort);
 				schoolUserListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				JScrollPane schoolUserListScroll = new JScrollPane(schoolUserListList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-				schoolUserPanel.add(schoolUserListScroll);
-				mainFrame.add(schoolUserPanel);
-				schoolListPanel.setVisible(false);
-				schoolUserPanel.setVisible(true);
+				schoolUserView = new JButton("View");
 				
-				//Figure out why it won't show
+				Object[] message = {
+						schoolUserListList,
+						schoolUserListScroll,
+						schoolUserView
+				};
+				JOptionPane.showConfirmDialog(null, message, schoolList[schoolListValue][0], JOptionPane.OK_CANCEL_OPTION);
+				
+				//Make the view and delete and idk i'm tired man
 			}
 		}
 		else if(control == edit) {
