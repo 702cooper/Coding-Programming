@@ -19,30 +19,33 @@ public class CodingProgramming extends JFrame implements ActionListener {
 	JButton enter;
 	JButton view;
 	JButton edit;
+	JPanel searchPanel;
+	JTextField searchTextField;
+	String searchValue;
 	JOptionPane editOptionPane;
 	JButton delete;
 	JPanel nameListPanel;
-	JPanel schoolListPanel;
-	JPanel gradeListPanel;
+	JPanel checkedoutListPanel;
+	JPanel overdueListPanel;
 	JComboBox<String> sortBox;
 	JList<String> nameListList;
-	JList<String> schoolListList;
-	JList<String> gradeListList;
+	JList<String> checkedoutListList;
+	JList<String> overdueListList;
 	DefaultListModel<String> nameDLM;
-	DefaultListModel<String> schoolDLM;
-	DefaultListModel<String> schoolSortDLM;
-	boolean schoolView = false;
-	DefaultListModel<String> gradeDLM;
-	DefaultListModel<String> gradeSortDLM;
+	DefaultListModel<String> checkedoutDLM;
+	DefaultListModel<String> overdueDLM;
 	int nameListValue;
-	int schoolListValue;
-	int gradeListValue;
+	int checkedoutListValue;
+	int overdueListValue;
 	String[] nameListSort;
-	//Name, School, Grade, # of Books checked out, Books checked out
+	//First Name, Last Name
 	String[][] userList = fileRead(0);
-	String[][] schoolList = fileRead(1);
-	String[][] bookList = fileRead(2);
-	String[][] gradeList = fileRead(3);
+	//First Name, Last Name, Serial of Book, When It Was Checked Out, How Long Till It's Overdue
+	String[][] checkedoutList = fileRead(1);
+	//First Name, Last Name, Serial of Book, How Long It's Been Overdue
+	String[][] overdueList = fileRead(2);
+	//Serial Number, Book Name, Author, Number in Stock, Total Inventory
+	String[][] bookList = fileRead(3);
 	boolean enterCheck = false;
 	
 	public static void main(String[] args) {
@@ -80,7 +83,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				if(enterCheck) {
 					int options = JOptionPane.showConfirmDialog(mainFrame, "Save Before Quitting?");
 					if(options == JOptionPane.YES_OPTION){
-						fileWrite(userList, schoolList, bookList, gradeList);
+						fileWrite(userList, checkedoutList, overdueList, bookList);
 						mainFrame.setVisible(false);
 						mainFrame.dispose();
 					}
@@ -95,7 +98,19 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				}
 			}
 		});
-
+		
+		searchPanel = new JPanel();
+		searchTextField = new JTextField();
+		searchTextField.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				JTextField text = (JTextField) event.getSource();
+				searchValue = text.getText();
+			}
+		});
+		searchPanel.add(searchTextField);
+		mainFrame.add(searchPanel);
+		
 		nameDLM = new DefaultListModel();
 		
 		nameListPanel = new JPanel();
@@ -128,67 +143,66 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		mainFrame.add(nameListPanel);
 		nameListPanel.setVisible(true);
 		
-		//Add schoolDLM
-		schoolDLM = new DefaultListModel();
+		//Add checkedoutDLM
+		checkedoutDLM = new DefaultListModel();
 		
-		schoolListPanel = new JPanel();
-		JLabel schoolListLabel = new JLabel("");
-		schoolListPanel.add(schoolListLabel);
-		String[] schoolListSort = new String[schoolList.length];
-		String[] temp = new String[schoolList.length];
-		for(int x = 0; x < schoolList.length; x++) {
-			temp[x] = schoolList[x][0];
+		checkedoutListPanel = new JPanel();
+		JLabel checkedoutListLabel = new JLabel("");
+		checkedoutListPanel.add(checkedoutListLabel);
+		String[] checkedoutListSort = new String[checkedoutList.length];
+		String[] temp = new String[checkedoutList.length];
+		for(int x = 0; x < checkedoutList.length; x++) {
+			temp[x] = checkedoutList[x][0];
 		}
 		temp = removeDuplicates(temp);
 		for(int x = 0; x < temp.length; x++) {
 			if(temp[x] != null && temp[x] != "")
-				schoolListSort[x] = temp[x];
+				checkedoutListSort[x] = temp[x];
 		}
-		schoolListList = new JList(schoolDLM);
-		for(int x = 0; x < schoolListSort.length; x++) {
-			if(schoolListSort[x] != null)
-				schoolDLM.addElement(schoolListSort[x]);
+		checkedoutListList = new JList(checkedoutDLM);
+		for(int x = 0; x < checkedoutListSort.length; x++) {
+			if(checkedoutListSort[x] != null)
+				checkedoutDLM.addElement(checkedoutListSort[x]);
 		}
-		schoolSortDLM = schoolDLM;
-		schoolListList.addListSelectionListener(new ListSelectionListener() {
+		checkedoutListList.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent event) {
 				JList list = (JList) event.getSource();
-				schoolListValue = list.getSelectedIndex();
+				checkedoutListValue = list.getSelectedIndex();
 			}
 		});
-		schoolListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		JScrollPane schoolListScroll = new JScrollPane(schoolListList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		schoolListPanel.add(schoolListScroll);
-		mainFrame.add(schoolListPanel);
-		schoolListPanel.setVisible(false);
+		checkedoutListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		JScrollPane checkedoutListScroll = new JScrollPane(checkedoutListList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		checkedoutListPanel.add(checkedoutListScroll);
+		mainFrame.add(checkedoutListPanel);
+		checkedoutListPanel.setVisible(false);
 		
-		gradeDLM = new DefaultListModel();
+		overdueDLM = new DefaultListModel();
 		
-		gradeListPanel = new JPanel();
-		JLabel gradeListLabel = new JLabel("");
-		gradeListPanel.add(gradeListLabel);
-		gradeListList = new JList<String>(gradeDLM);
-		for(int x = 0; x < gradeList.length; x++) {
-			if(gradeList[x][0] != null) {
-				gradeDLM.addElement(gradeList[x][0]);
+		overdueListPanel = new JPanel();
+		JLabel overdueListLabel = new JLabel("");
+		overdueListPanel.add(overdueListLabel);
+		overdueListList = new JList<String>(overdueDLM);
+		for(int x = 0; x < overdueList.length; x++) {
+			if(overdueList[x][0] != null) {
+				overdueDLM.addElement(overdueList[x][0]);
 			}
 		}
-		gradeListList.addListSelectionListener(new ListSelectionListener() {
+		overdueListList.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent event) {
 				JList list = (JList) event.getSource();
-				gradeListValue = list.getSelectedIndex();
+				overdueListValue = list.getSelectedIndex();
 				
 			}
 		});
-		gradeListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		JScrollPane gradeListScroll = new JScrollPane(gradeListList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		gradeListPanel.add(gradeListScroll);
-		mainFrame.add(gradeListPanel);
-		gradeListPanel.setVisible(false);
+		overdueListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		JScrollPane overdueListScroll = new JScrollPane(overdueListList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		overdueListPanel.add(overdueListScroll);
+		mainFrame.add(overdueListPanel);
+		overdueListPanel.setVisible(false);
 		
-		//Allows user to sort the list by Name, School, or Grade
+		//Allows user to sort the list by Name, checkedout, or overdue
 		JPanel sortListPanel = new JPanel();
 		JLabel sortList = new JLabel("Sort By");
 		sortListPanel.add(sortList);
@@ -225,21 +239,19 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			int typeSort = (int)cb.getSelectedIndex();
 			if(typeSort == 0) {
 				//Make these
-				schoolListPanel.setVisible(false);
-				gradeListPanel.setVisible(false);
+				checkedoutListPanel.setVisible(false);
+				overdueListPanel.setVisible(false);
 				nameListPanel.setVisible(true);
-				schoolDLM = schoolSortDLM;
 			}	
 			else if(typeSort == 1) {
 				nameListPanel.setVisible(false);
-				gradeListPanel.setVisible(false);
-				schoolListPanel.setVisible(true);
+				overdueListPanel.setVisible(false);
+				checkedoutListPanel.setVisible(true);
 			}
 			else if(typeSort == 2) {
 				nameListPanel.setVisible(false);
-				schoolListPanel.setVisible(false);
-				gradeListPanel.setVisible(true);
-				schoolDLM = schoolSortDLM;
+				checkedoutListPanel.setVisible(false);
+				overdueListPanel.setVisible(true);
 			}
 			//System.out.println("Selected from " + event.getStateChange());
 		}
@@ -261,12 +273,13 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				}
 				//Name, School, Grade, # of Books checked out, Books checked out
 			}
-			else if(schoolListPanel.isVisible()) {
-				JOptionPane schoolUserOptionPane = new JOptionPane();
-				JList schoolUserListList;
-				JButton schoolUserView;
+			else if(checkedoutListPanel.isVisible()) {
+				/*JOptionPane schoolUserOptionPane = new JOptionPane();
+				//JList schoolUserListList;
+				schoolUserView = new JButton("View");
+				schoolUserEdit = new JButton("Edit");
 				
-				String[] schoolUserList = new String[userList.length];
+				schoolUserList = new String[userList.length];
 				for(int x = 0; x < userList.length; x++) {
 					if(userList[x][0] != null) {
 						if(userList[x][1].equals(schoolList[schoolListValue][0]))
@@ -297,21 +310,31 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				
 				schoolUserListList = new JList(schoolUserListSort);
 				schoolUserListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+				schoolUserListList.addListSelectionListener(new ListSelectionListener() {
+					@Override
+					public void valueChanged(ListSelectionEvent event) {
+						JList list = (JList) event.getSource();
+						schoolUserListValue = list.getSelectedIndex();
+						
+					}
+				});
 				JScrollPane schoolUserListScroll = new JScrollPane(schoolUserListList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-				schoolUserView = new JButton("View");
+				schoolUserView.addActionListener(this);
+				schoolUserEdit.addActionListener(this);
 				
 				Object[] message = {
 						schoolUserListList,
 						schoolUserListScroll,
-						schoolUserView
+						schoolUserView,
+						schoolUserEdit
 				};
 				JOptionPane.showConfirmDialog(null, message, schoolList[schoolListValue][0], JOptionPane.OK_CANCEL_OPTION);
 				
-				//Make the view and delete and idk i'm tired man
+				//Make the view and delete and idk i'm tired man*/
 			}
 		}
 		else if(control == edit) {
-			enterCheck = true;
+			/*enterCheck = true;
 			editOptionPane = new JOptionPane();
 			if(nameListPanel.isVisible()) {
 				String name = null;
@@ -533,11 +556,11 @@ public class CodingProgramming extends JFrame implements ActionListener {
 						}
 					}
 				}
-			}
+			}*/
 		}
 		if(control == delete) {
 			if(nameListPanel.isVisible()) {
-				Object[] warningMessage = {
+				/*Object[] warningMessage = {
 						"Are you sure you want to delete this user?"
 				};
 				int option = JOptionPane.showConfirmDialog(null, warningMessage, "Warning", JOptionPane.YES_NO_OPTION);
@@ -559,10 +582,10 @@ public class CodingProgramming extends JFrame implements ActionListener {
 					nameDLM.removeElementAt(nameListValue);
 					nameListPanel.validate();
 					nameListPanel.repaint();
-				}
+				}*/
 			}
-			else if(schoolListPanel.isVisible()) {
-				Object[] warningMessage = {
+			else if(checkedoutListPanel.isVisible()) {
+				/*Object[] warningMessage = {
 						"Are you sure you want to delete this school?"
 				};
 				int option = JOptionPane.showConfirmDialog(null, warningMessage, "Warning", JOptionPane.YES_NO_OPTION);
@@ -610,11 +633,11 @@ public class CodingProgramming extends JFrame implements ActionListener {
 					gradeDLM.removeElementAt(gradeListValue);
 					gradeListPanel.validate();
 					gradeListPanel.repaint();
-				}
+				}*/
 			}
 		}
 		else if(control == enter) {
-			enterCheck = true;
+			/*enterCheck = true;
 			if(nameListPanel.isVisible()) {
 				String name = null;
 				String school = null;
@@ -805,11 +828,11 @@ public class CodingProgramming extends JFrame implements ActionListener {
 					}
 				}
 				//Actually add the grade and stuff
-			}
+			}*/
 		}
 	}
 	
-	public static void fileWrite(String[][] userListTemp, String[][] schoolListTemp, String[][] bookListTemp, String[][] gradeListTemp) {
+	public static void fileWrite(String[][] userListTemp, String[][] checkedoutListTemp, String[][] overdueListTemp, String[][] bookListTemp) {
 		// The name of the file to open.
 		String fileName = "list.txt";
 		
@@ -849,21 +872,21 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				uMark = true;
 			}
 			if(sMark == false) {
-				list[x] = "//School Name";
+				list[x] = "//First Name, Last Name, Serial of Book, When It Was Checked Out, How Long Till It's Overdue";
 				x++;
-				list[x] = "[SCHOOLS] {";
+				list[x] = "[CHECKEDOUT] {";
 				x++;
-				for(int y = 0; y < schoolListTemp.length; y++) {
-					if(schoolListTemp[y][0] != null) {
-						for(int z = 0; z < schoolListTemp[y].length; z++) {
-							if(list[x] != null && schoolListTemp[y][z] != null)
-								list[x] = list[x] + schoolListTemp[y][z];
+				for(int y = 0; y < checkedoutListTemp.length; y++) {
+					if(checkedoutListTemp[y][0] != null) {
+						for(int z = 0; z < checkedoutListTemp[y].length; z++) {
+							if(list[x] != null && checkedoutListTemp[y][z] != null)
+								list[x] = list[x] + checkedoutListTemp[y][z];
 							else {
-								if(schoolListTemp[y][z] != null)
-									list[x] = "	" + schoolListTemp[y][z];
+								if(checkedoutListTemp[y][z] != null)
+									list[x] = "	" + checkedoutListTemp[y][z];
 							}
 							if(z < 4) {
-								if(schoolListTemp[y][z + 1] != null)
+								if(checkedoutListTemp[y][z + 1] != null)
 									list[x] = list[x] + ", ";
 							}
 						}
@@ -875,9 +898,9 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				sMark = true;
 			}
 			if(bMark == false) {
-				list[x] = "//Serial Number, Book Name, Author, Number in Stock";
+				list[x] = "//First Name, Last Name, Serial of Book, How Long It's Been Overdue";
 				x++;
-				list[x] = "[BOOKS] {";
+				list[x] = "[OVERDUE] {";
 				x++;
 				for(int y = 0; y < bookListTemp.length; y++) {
 					if(bookListTemp[y][0] != null) {
@@ -901,21 +924,21 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				bMark = true;
 			}
 			if(gMark == false) {
-				list[x] = "//Grades";
+				list[x] = "//Serial Number, Book Name, Author, Number in Stock, Total Inventory";
 				x++;
-				list[x] = "[GRADES] {";
+				list[x] = "[BOOKS] {";
 				x++;
-				for(int y = 0; y < gradeListTemp.length; y++) {
-					if(gradeListTemp[y][0] != null) {
-						for(int z = 0; z < gradeListTemp[y].length; z++) {
-							if(list[x] != null && gradeListTemp[y][z] != null)
-								list[x] = list[x] + gradeListTemp[y][z];
+				for(int y = 0; y < overdueListTemp.length; y++) {
+					if(overdueListTemp[y][0] != null) {
+						for(int z = 0; z < overdueListTemp[y].length; z++) {
+							if(list[x] != null && overdueListTemp[y][z] != null)
+								list[x] = list[x] + overdueListTemp[y][z];
 							else {
-								if(gradeListTemp[y][z] != null)
-									list[x] = "	" + gradeListTemp[y][z];
+								if(overdueListTemp[y][z] != null)
+									list[x] = "	" + overdueListTemp[y][z];
 							}
 							if(z < 4) {
-								if(gradeListTemp[y][z + 1] != null)
+								if(overdueListTemp[y][z + 1] != null)
 									list[x] = list[x] + ", ";
 							}
 						}
@@ -988,11 +1011,11 @@ public class CodingProgramming extends JFrame implements ActionListener {
             if(opt == 0)
             	keyword = "[USERS]";
             else if(opt == 1)
-            	keyword = "[SCHOOLS]";
+            	keyword = "[CHECKEDOUT]";
             else if(opt == 2)
-            	keyword = "[BOOKS]";
+            	keyword = "[OVERDUE]";
             else if(opt == 3)
-            	keyword = "[GRADES]";
+            	keyword = "[BOOKS]";
             
             String temp = "";
             int arRow = 0;

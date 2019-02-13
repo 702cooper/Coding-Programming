@@ -1,27 +1,36 @@
 //Name, School, Grade, Number of Books Checked Out, Serial of Books
 [USERS] {
-	Marci, Arbor View, 10, 2, 004
-	Phil, Shadow Ridge, 11, 1, 003;004
+	Marci, Arbor View High School, 10, 2, 004
+	Phil, Arbor View High School, 11, 1, 003;004
 	Steve, Las Vegas, 9, 2, 987;879
-	Jupiter, Arbor View, 12, 5, 001;214;268;297;284
-	Harold, Arbor View, 12, 1, 002
+	Jupiter, Arbor View High School, 12, 5, 001;214;268;297;284
+	Hannah, Arbor View High School, 12, 1, 001
 }
 //School Name
 [SCHOOLS] {
-	Arbor View
-	Shadow Ridge
+	Arbor View High School
 	Las Vegas
 }
-//Serial Number, Book Name, Author, Number in Stock
+//Serial Number, Book Name, Author, Number in Stock, Total Inventory
 [BOOKS] {
-	666, H.P. Lovecraft Compendium, H.P. Lovecraft, 3
-	004, Why Is My Marriage Failing?, John Cariani, 2
-	003, Hockey Equipment, HockPro Magazine, 5
-	001, The Walking Dead Compendium 1, Robert Kirkman, 2
-	214, Iliad, Homer, 3
-	268, Aeneid, Virgil, 2
-	297, Odyssey, Homer, 5
-	987, Pride and Prejudice, Jane Austen, 1
-	879, To Kill a Mockingbird, Harper Lee, 2
-	002, Going Out With The Boys 101, MemeLord7, 7
+	666, H.P. Lovecraft Compendium, H.P. Lovecraft, 3, 3
+	004, Why Is My Marriage Failing?, John Cariani, 2, 3
+	003, Hockey Equipment, HockPro Magazine, 5, 6
+	001, The Walking Dead Compendium 1, Robert Kirkman, 2, 3
+	214, Iliad, Homer, 3, 4
+	268, Aeneid, Virgil, 2, 2
+	297, Odyssey, Homer, 5, 6
+	987, Pride and Prejudice, Jane Austen, 1, 2
+	879, To Kill a Mockingbird, Harper Lee, 2, 3
+	002, Going Out With The Boys 101, MemeLord7, 1, 2
+}
+//Grades
+[GRADES] {
+	6
+	7
+	8
+	9
+	10
+	11
+	12
 }
