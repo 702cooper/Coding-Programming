@@ -485,8 +485,15 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			}
 		}
 		else if(control == renew) {
-			//checkedoutList[checkedoutListValue][4]
-			//ADD TWO WEEKS TO THE THING
+			String date = checkedoutList[checkedoutListValue][4];
+			String month = "";
+			String day = "";
+			String year = "";
+			for(int x = 0; x < date.length(); x++) {
+				if(x == 1 || x == 2) {
+					month = month + date.charAt(x);
+				}
+			}
 		}
 		else if(control == edit) {
 			enterCheck = true;
@@ -659,8 +666,8 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				Object[] message = {
 						"Book: ", serialComboBox,
 						"Name: ", namesComboBox,
-						"Checked out at: ", overdueList[overdueListValue][3],
-						"Overdue by: ", overdueList[overdueListValue][4],
+						"Checked out at: ", overdueList[overdueListValue][2],
+						"Overdue by: ", overdueList[overdueListValue][3],
 						delete
 				};
 				int option = editOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
@@ -977,6 +984,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				String name = null;
 				String firstName = null;
 				String lastName = null;
+				String date = null;
 				
 				int mark = 0;
 				for(int x = 0; x < booksList.length; x++) {
@@ -1000,20 +1008,22 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				}
 				JComboBox<String> namesComboBox = new JComboBox<String>(namesList);
 				
-				String[] month = new String[12];
-				for(int x = 0; x < month.length; x++) {
+				String[] months = new String[12];
+				for(int x = 0; x < months.length; x++) {
 					if((Integer.toString(x)).length() == 1) {
-						month[x] = "0" + (Integer.toString(x + 1));
+						months[x] = "0" + (Integer.toString(x + 1));
 					}
 					else {
-						month[x] = Integer.toString(x + 1);
+						months[x] = Integer.toString(x + 1);
 					}
 				}
-				JComboBox monthComboBox = new JComboBox(month);
-				monthComboBox.addActionListener(this);
-				String[] day = new String[31];
-				String year = new String();
-				
+				JComboBox<String> monthComboBox = new JComboBox<String>(months);
+				String[] days = new String[31];
+				for(int x = 0; x < 31; x++) {
+					days[x] = Integer.toString(x + 1);
+				}
+				JComboBox<String> dayComboBox = new JComboBox<String>(days);
+				JTextField yearTextField = new JTextField(4);
 				
 				String[] overdueListWeeks = new String[3];
 				for(int x = 0; x < overdueListWeeks.length; x++)
@@ -1024,9 +1034,11 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				Object[] message = {
 						"Book: ", serialComboBox,
 						"Name: ", namesComboBox,
-						"Checked out at: ", monthComboBox, dayComboBox, yearTextField,
-						"Overdue by: ", overdueComboBox,
-						delete
+						"Checked out at: ",
+						"\nMonth: ", monthComboBox,
+						"Day: ", dayComboBox,
+						"Year: ", yearTextField,
+						"Overdue by: ", overdueComboBox
 				};
 				int option = JOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
 				if(option == JOptionPane.OK_OPTION) {
@@ -1060,6 +1072,42 @@ public class CodingProgramming extends JFrame implements ActionListener {
 							checkedoutList[x][0] = serial;
 							checkedoutList[x][1] = firstName;
 							checkedoutList[x][2] = lastName;
+							
+							String month = Integer.toString(monthComboBox.getSelectedIndex() + 1);
+							String day = Integer.toString(dayComboBox.getSelectedIndex() + 1);
+							if(day.length() == 1)
+								day = "0" + day;
+							String year = yearTextField.getText();
+							date = month + "/" + day + "/" + year;
+							checkedoutList[x][3] = date;
+							
+							String overdueDay = new String();
+							if(overdueComboBox.getSelectedIndex() == 1)
+								overdueDay = Integer.toString((Integer.parseInt(day)) + 7);
+							else if(overdueComboBox.getSelectedIndex() == 2)
+								overdueDay = Integer.toString((Integer.parseInt(day)) + 14);
+							else if(overdueComboBox.getSelectedIndex() == 3)
+								overdueDay = Integer.toString((Integer.parseInt(day)) + 21);
+							String overdueMonth = month;
+							String overdueYear = year;
+							
+							if((overdueMonth == "1" || overdueMonth == "3" || overdueMonth == "5" || overdueMonth == "7" || overdueMonth == "10" || overdueMonth == "12") && (Integer.parseInt(overdueDay) > 31)) {
+								overdueMonth = Integer.toString(Integer.parseInt(overdueMonth) + 1);
+								overdueDay = Integer.toString(Integer.parseInt(overdueDay) - 31);
+								if(overdueMonth == "12") {
+									overdueYear = Integer.toString(Integer.parseInt(overdueYear) + 1);
+								}
+							}
+							else if((overdueMonth == "4" || overdueMonth == "6" || overdueMonth == "8" || overdueMonth == "9" || overdueMonth == "11") && (Integer.parseInt(overdueDay) > 31)) {
+								overdueMonth = Integer.toString(Integer.parseInt(overdueMonth) + 1);
+								overdueDay = Integer.toString(Integer.parseInt(overdueDay) - 30);
+							}
+							else if((overdueMonth == "2") && (Integer.parseInt(overdueDay) > 29)) {
+								overdueMonth = Integer.toString(Integer.parseInt(overdueMonth) + 1);
+								overdueDay = Integer.toString(Integer.parseInt(overdueDay) - 29);
+							}
+							String overdueDate = overdueMonth + "/" + overdueDay + "/" + overdueYear;
+							checkedoutList[x][4] = overdueDate;
 							
 							temp = "";
 							for(int y = 0; y < booksList.length; y++) {
