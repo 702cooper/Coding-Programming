@@ -24,6 +24,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 	JButton edit;
 	static JOptionPane editOptionPane;
 	JButton renew;
+	JButton overdueNow;
 	JButton delete;
 	
 	//JOptionPane editOptionPane;
@@ -402,12 +403,16 @@ public class CodingProgramming extends JFrame implements ActionListener {
 					renew = new JButton("Renew");
 					renew.addActionListener(this);
 					
+					overdueNow = new JButton("This is Overdue");
+					overdueNow.addActionListener(this);
+					
 					Object[] summary = {
 							"Book: ", sum[0],
 							"\nName: ", sum[1],
 							"\nChecked Out: ", sum[2],
 							"\nOverdue at: ", sum[3],
-							renew
+							renew,
+							overdueNow
 					};
 					JOptionPane.showMessageDialog(null, summary, "Checked Out", JOptionPane.INFORMATION_MESSAGE);
 				}
@@ -486,17 +491,85 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		}
 		else if(control == renew) {
 			String date = checkedoutList[checkedoutListValue][4];
-			String month = "";
-			String day = "";
-			String year = "";
-			for(int x = 0; x < date.length(); x++) {
-				if(x == 1 || x == 2) {
-					month = month + date.charAt(x);
+			System.out.println(date);
+			String month = Character.toString(date.charAt(0)) + Character.toString(date.charAt(1));
+			String day = Character.toString(date.charAt(3)) + Character.toString(date.charAt(4));
+			String year = Character.toString(date.charAt(6)) + Character.toString(date.charAt(7)) + Character.toString(date.charAt(8)) + Character.toString(date.charAt(9));
+			
+			String[] renewList = new String[3];
+			for(int x = 0; x < renewList.length; x++) {
+				if(x == 0)
+					renewList[x] = Integer.toString(x + 1) + " week";
+				else
+					renewList[x] = Integer.toString(x + 1) + " weeks";
+			}
+			JComboBox<String> renewComboBox = new JComboBox<String>(renewList);
+			
+			Object[] message = {
+					"Renew for: ", renewComboBox
+			};
+			int option = JOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
+			if(option == JOptionPane.OK_OPTION) {
+				System.out.println(day);
+				if(renewComboBox.getSelectedIndex() == 0)
+					day = Integer.toString(Integer.parseInt(day) + 7);
+				else if(renewComboBox.getSelectedIndex() == 1)
+					day = Integer.toString(Integer.parseInt(day) + 14);
+				else if(renewComboBox.getSelectedIndex() == 2)
+					day = Integer.toString(Integer.parseInt(day) + 21);
+				System.out.println(day);
+				
+				if((month == "1" || month == "3" || month == "5" || month == "7" || month == "10" || month == "12") && (Integer.parseInt(day) > 31)) {
+					month = Integer.toString(Integer.parseInt(month) + 1);
+					day = Integer.toString(Integer.parseInt(day) - 31);
+					if(month == "12") {
+						year = Integer.toString(Integer.parseInt(year) + 1);
+					}
 				}
+				else if((month == "4" || month == "6" || month == "8" || month == "9" || month == "11") && (Integer.parseInt(day) > 31)) {
+					month = Integer.toString(Integer.parseInt(month) + 1);
+					day = Integer.toString(Integer.parseInt(day) - 30);
+				}
+				else if((month == "2") && (Integer.parseInt(day) > 29)) {
+					month = Integer.toString(Integer.parseInt(month) + 1);
+					day = Integer.toString(Integer.parseInt(day) - 29);
+				}
+				
+				date = month + "/" + day + "/" + year;
+				checkedoutList[checkedoutListValue][4] = date;
+			}
+		}
+		else if(control == overdueNow) {
+			int option = JOptionPane.showConfirmDialog(null, "Are you sure you want to make this book overdue?", "", JOptionPane.OK_CANCEL_OPTION);
+			if(option == JOptionPane.OK_OPTION) {
+				String[] temp = new String[5];
+				for(int x = 0; x < temp.length; x++) {
+					temp[x] = checkedoutList[checkedoutListValue][x];
+					checkedoutList[checkedoutListValue][x] = null;
+				}
+				temp[3] = temp[4];
+				temp[4] = null;
+				String book = null;
+				for(int x = 0; x < overdueList.length; x++) {
+					if(overdueList[x][0] == null) {
+						for(int y = 0; y < overdueList[x].length; y++)
+							overdueList[x][y] = temp[y];
+						
+						for(int y = 0; y < booksList.length; y++) {
+							if(overdueList[x][0].equals(booksList[y][0]))
+								book = booksList[y][1];
+						}
+						
+						x = overdueList.length + 1;
+					}
+				}
+				
+				checkedoutDLM.removeElementAt(checkedoutListValue);
+				overdueDLM.addElement(book);
 			}
 		}
 		else if(control == edit) {
-			enterCheck = true;
+			//enterCheck = true;
 			editOptionPane = new JOptionPane();
 			if(nameListPanel.isVisible()) {
 				String firstName = null;
