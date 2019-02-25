@@ -25,10 +25,6 @@ public class CodingProgramming extends JFrame implements ActionListener {
 	static JOptionPane editOptionPane;
 	JButton renew;
 	JButton delete;
-	//Search
-	JTextField search;
-	String searchValue = "";
-	JPanel searchPanel;
 	
 	//JOptionPane editOptionPane;
 	//Panels
@@ -113,13 +109,6 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				}*/
 			}
 		});
-		
-		searchPanel = new JPanel();
-		JLabel searchLabel = new JLabel("Search: ");
-		searchPanel.add(searchLabel);
-		search = new JTextField(10);
-		searchPanel.add(search);
-		mainFrame.add(searchPanel);
 		
 		nameDLM = new DefaultListModel();
 		nameListPanel = new JPanel();
@@ -272,110 +261,11 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		enter.addActionListener(this);
 		view.addActionListener(this);
 		edit.addActionListener(this);
-		search.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				searchValue = search.getText();
-				if(nameListPanel.isVisible()) {
-					//JTextField text = (JTextField) event.getSource();
-					nameDLM.clear();
-					for(int x = 0; x < nameList.length; x++) {
-						if(nameList[x][0] != null) {
-							if(nameList[x][0].contains(searchValue) || nameList[x][1].contains(searchValue)) {
-								nameDLM.addElement(nameList[x][0]);
-							}
-						}
-					}
-					nameListPanel.validate();
-					nameListPanel.repaint();
-				}
-				else if(checkedoutListPanel.isVisible()) {
-					String[] bookTitle = new String[checkedoutList.length];
-					for(int x = 0; x < bookTitle.length; x++) {
-						for(int y = 0; y < booksList.length; y++) {
-							if(booksList[y][0] != null && checkedoutList[x][0] != null) {
-								if(booksList[y][0].equals(checkedoutList[x][0]))
-									bookTitle[x] = booksList[y][1];
-							}
-						}
-					}
-					
-					checkedoutDLM.clear();
-					for(int x = 0; x < checkedoutList.length; x++) {
-						if(checkedoutList[x][0] != null && checkedoutList[x][1] != null && checkedoutList[x][2] != null && bookTitle != null) {
-							if(checkedoutList[x][0].contains(searchValue) || checkedoutList[x][1].contains(searchValue) || checkedoutList[x][2].contains(searchValue) || bookTitle[x].contains(searchValue))
-								checkedoutDLM.addElement(bookTitle[x]);
-						}
-					}
-				}
-				else if(overdueListPanel.isVisible()) {
-					String[] bookTitle = new String[overdueList.length];
-					for(int x = 0; x < bookTitle.length; x++) {
-						for(int y = 0; y < overdueList.length; y++) {
-							if(overdueList[y][0] != null && overdueList[x][0] != null) {
-								if(overdueList[y][0].equals(overdueList[x][0]))
-									bookTitle[x] = booksList[y][1];
-							}
-						}
-					}
-					
-					overdueDLM.clear();
-					for(int x = 0; x < overdueList.length; x++) {
-						if(overdueList[x][0] != null && overdueList[x][1] != null && overdueList[x][2] != null && bookTitle[x] != null) {
-							if(overdueList[x][0].contains(searchValue) || overdueList[x][1].contains(searchValue) || overdueList[x][2].contains(searchValue) || bookTitle[x].contains(searchValue))
-								overdueDLM.addElement(bookTitle[x]);
-						}
-					}
-				}
-				else if(booksListPanel.isVisible()) {
-					booksDLM.clear();
-					for(int x = 0; x < booksList.length; x++) {
-						if(booksList[x][0] != null && booksList[x][1] != null && booksList[x][2] != null) {
-							if(booksList[x][0].contains(searchValue) || booksList[x][1].contains(searchValue) || booksList[x][2].contains(searchValue))
-								booksDLM.addElement(booksList[x][1]);
-						}
-					}
-				}
-			}
-		});
 	}
 	
 	@SuppressWarnings("static-access")
 	public void actionPerformed(ActionEvent event) {
 		Object control = event.getSource();
-		
-		String[][] searchNameList = new String[nameList.length][5];
-		for(int x = 0; x < nameList.length; x++) {
-			if(nameList[x][0] != null && nameList[x][1] != null) {
-				if(nameList[x][0].contains(searchValue) || nameList[x][1].contains(searchValue)) {
-					searchNameList[x] = nameList[x];
-				}
-			}
-		}
-		for(int x = 0; x < searchNameList.length; x++) {
-			if((x + 1) < searchNameList.length) {
-				if(searchNameList[x][0] == null && searchNameList[x + 1][0] != null) {
-					for(int y = 0; y < searchNameList[x].length; y++)
-						searchNameList[x][y] = searchNameList[x + 1][y];
-					for(int y = 0; y < searchNameList[x].length; y++)
-						searchNameList[x + 1][y] = null;
-					x = 0;
-				}
-			}
-		}
-		
-		for(int x = 0; x < searchNameList.length; x++) {
-			if(checkedoutList[x][0] != null)
-				System.out.println("\n" + x);
-			for(int y = 0; y < searchNameList[x].length; y++) {
-				if(searchNameList[x][0] != null)
-					System.out.println(searchNameList[x][y]);
-			}
-		}
-		
-		String[] searchCheckedoutList = new String[checkedoutList.length];
-		String[] searchOverdueList = new String[overdueList.length];
-		String[] searchBooksList = new String[booksList.length];
 		
 		if(control == sortBox) {
 			JComboBox<?> cb = (JComboBox<?>)event.getSource();
@@ -408,185 +298,189 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			//System.out.println("Selected from " + event.getStateChange());
 		}
 		else if(control == view) {
-			if(true) {
-				if(nameListPanel.isVisible()) {
-					String[] sum = new String[4];
-					String summary = "";
-					try {
-						sum[0] = searchNameList[nameListValue][0];
-						sum[1] = searchNameList[nameListValue][1];
-						
-						String[] books = new String[checkedoutList.length];
-						for(int x = 0; x < checkedoutList.length; x++) {
-							if(checkedoutList[x][1] != null && checkedoutList[x][2] != null && searchNameList[nameListValue][0] != null && searchNameList[nameListValue][1] != null) {
-								if(checkedoutList[x][1].equals(searchNameList[nameListValue][0]) && checkedoutList[x][2].equals(searchNameList[nameListValue][1])) {
-									books[x] = checkedoutList[x][0];
-								}
-							}
-						}
-						for(int x = 0; x < books.length; x++) {
-							if((x + 1) < books.length) {
-								if(books[x] == null && books[x + 1] != null) {
-									books[x] = books[x + 1];
-									books[x + 1] = null;
-									x = 0;
-								}
-							}
-						}
-						for(int x = 0; x < books.length; x++) {
-							for(int y = 0; y < booksList.length; y++) {
-								if(books[x] != null && booksList[y][0] != null) {
-									if(books[x].equals(booksList[y][0])) {
-										books[x] = booksList[y][1];
-									}
-								}
-							}
-						}
-						sum[2] = "";
-						for(int x = 0; x < books.length; x++) {
-							if(books[x] != null)
-								sum[2] = sum[2] + books[x] + "\n";
-						}
-						
-						String[] oBooks = new String[overdueList.length];
-						for(int x = 0; x < overdueList.length; x++) {
-							if(overdueList[x][1] != null && overdueList[x][2] != null && searchNameList[nameListValue][0] != null && searchNameList[nameListValue][1] != null) {
-								if(overdueList[x][1].equals(searchNameList[nameListValue][0]) && overdueList[x][2].equals(searchNameList[nameListValue][1])) {
-									oBooks[x] = overdueList[x][0];
-								}
-							}
-						}
-						for(int x = 0; x < oBooks.length; x++) {
-							if((x + 1) < oBooks.length) {
-								if(oBooks[x] == null && oBooks[x + 1] != null) {
-									oBooks[x] = oBooks[x + 1];
-									oBooks[x + 1] = null;
-									x = 0;
-								}
-							}
-						}
-						for(int x = 0; x < oBooks.length; x++) {
-							for(int y = 0; y < booksList.length; y++) {
-								if(oBooks[x] != null && booksList[y][0] != null) {
-									if(oBooks[x].equals(booksList[y][0])) {
-										oBooks[x] = booksList[y][1];
-									}
-								}
-							}
-						}
-						sum[3] = "";
-						for(int x = 0; x < oBooks.length; x++) {
-							if(oBooks[x] != null)
-								sum[3] = sum[3] + oBooks[x] + "\n";
-						}
-						
-						summary = "Name: " + sum[0] + " " + sum[1]
-								+ "\n\nBooks Checked Out: " + sum[2]
-								+ "\nBooks Overdue: " + sum[3];
-						JOptionPane.showMessageDialog(null, summary);
-					}
-					catch(NullPointerException e) {
-						JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
-					}
-					//Name, School, Grade, # of Books checked out, Books checked out
-				}
-				else if(checkedoutListPanel.isVisible()) {
-					String[] sum = new String[4];
-					try {
-						sum[0] = checkedoutList[checkedoutListValue][0];
-						for(int x = 0; x < booksList.length; x++) {
-							if(booksList[x][0] != null) {
-								if(booksList[x][0].equals(sum[0]))
-									sum[0] = booksList[x][1];
-							}
-						}
-						sum[1] = checkedoutList[checkedoutListValue][1] + " " + checkedoutList[checkedoutListValue][2];
-						sum[2] = checkedoutList[checkedoutListValue][3];
-						sum[3] = checkedoutList[checkedoutListValue][4];
-						
-						renew = new JButton("Renew");
-						renew.addActionListener(this);
-						
-						Object[] summary = {
-								"Book: ", sum[0],
-								"\nName: ", sum[1],
-								"\nChecked Out: ", sum[2],
-								"\nOverdue at: ", sum[3],
-								renew
-						};
-						JOptionPane.showMessageDialog(null, summary, "Checked Out", JOptionPane.INFORMATION_MESSAGE);
-					}
-					catch(NullPointerException e) {
-						JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
-					}
-				}
-				else if(overdueListPanel.isVisible()) {
-					String[] sum = new String[4];
-					String summary = "";
-					try {
-						sum[0] = overdueList[overdueListValue][0];
-						for(int x = 0; x < booksList.length; x++) {
-							if(booksList[x][0] != null) {
-								if(booksList[x][0].equals(sum[0]))
-									sum[0] = booksList[x][1];
-							}
-						}
-						sum[1] = overdueList[overdueListValue][1] + " " + overdueList[overdueListValue][2];
-						sum[2] = overdueList[overdueListValue][3];
-						
-						summary = "Book: " + sum[0]
-								+ "\nName: " + sum[1]
-								+ "\nChecked Out: " + sum[2];
-						JOptionPane.showMessageDialog(null, summary, "Checked Out", JOptionPane.INFORMATION_MESSAGE);
-					}
-					catch(NullPointerException e) {
-						JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
-					}
-				}
-				else if(booksListPanel.isVisible()) {
-					String[] sum = new String[7];
-					String summary = "";
-					try {
-						sum[0] = booksList[booksListValue][0];
-						sum[1] = booksList[booksListValue][1];
-						sum[2] = booksList[booksListValue][2];
-						sum[3] = booksList[booksListValue][3];
-						sum[4] = booksList[booksListValue][4];
-						
-						sum[5] = "";
-						for(int x = 0; x < checkedoutList.length; x++) {
-							if(checkedoutList[x][0] != null) {
-								if(booksList[booksListValue][0].equals(checkedoutList[x][0])) {
-									sum[5] = sum[5] + "\t" + checkedoutList[x][1] + " " + checkedoutList[x][2] + "\n\t\t\t";
-								}
-							}
-						}
-						sum[6] = "";
-						for(int x = 0; x < overdueList.length; x++) {
-							if(overdueList[x][0] != null) {
-								if(booksList[booksListValue][0].equals(overdueList[x][0])) {
-									sum[6] = sum[6] + "\t" + overdueList[x][1] + " " + overdueList[x][2] + "\n\t\t\t";
-								}
-							}
-						}
-						
-						if(sum[5].equals(""))
-							sum[5] = "N/A\n";
-						if(sum[6].equals(""))
-							sum[6] = "N/A";
+			if(nameListPanel.isVisible()) {
+				String[] sum = new String[4];
+				String summary = "";
+				try {
+					sum[0] = nameList[nameListValue][0];
+					sum[1] = nameList[nameListValue][1];
 					
-						summary = "Serial of Book: " + sum[0]
-								+ "\nBook: " + sum[1]
-								+ "\nAuthor: " + sum[2]
-								+ "\nTotal in Inventory: " + sum[3]
-								+ "\nTotal in Stock: " + sum[4]
-								+ "\n\nChecked out to:	" + sum[5]
-								+ "Overdue: " + sum[6];
-						JOptionPane.showMessageDialog(null, summary, "Book", JOptionPane.INFORMATION_MESSAGE);
+					String[] books = new String[checkedoutList.length];
+					for(int x = 0; x < checkedoutList.length; x++) {
+						if(checkedoutList[x][1] != null && checkedoutList[x][2] != null && nameList[nameListValue][0] != null && nameList[nameListValue][1] != null) {
+							if(checkedoutList[x][1].equals(nameList[nameListValue][0]) && checkedoutList[x][2].equals(nameList[nameListValue][1])) {
+								books[x] = checkedoutList[x][0];
+							}
+						}
 					}
-					catch(NullPointerException e) {
-						JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
+					for(int x = 0; x < books.length; x++) {
+						if((x + 1) < books.length) {
+							if(books[x] == null && books[x + 1] != null) {
+								books[x] = books[x + 1];
+								books[x + 1] = null;
+								x = 0;
+							}
+						}
 					}
+					for(int x = 0; x < books.length; x++) {
+						for(int y = 0; y < booksList.length; y++) {
+							if(books[x] != null && booksList[y][0] != null) {
+								if(books[x].equals(booksList[y][0])) {
+									books[x] = booksList[y][1];
+								}
+							}
+						}
+					}
+					sum[2] = "";
+					for(int x = 0; x < books.length; x++) {
+						if(books[x] != null)
+							sum[2] = sum[2] + books[x] + "\n";
+					}
+					
+					String[] oBooks = new String[overdueList.length];
+					for(int x = 0; x < overdueList.length; x++) {
+						if(overdueList[x][1] != null && overdueList[x][2] != null && nameList[nameListValue][0] != null && nameList[nameListValue][1] != null) {
+							if(overdueList[x][1].equals(nameList[nameListValue][0]) && overdueList[x][2].equals(nameList[nameListValue][1])) {
+								oBooks[x] = overdueList[x][0];
+							}
+						}
+					}
+					for(int x = 0; x < oBooks.length; x++) {
+						if((x + 1) < oBooks.length) {
+							if(oBooks[x] == null && oBooks[x + 1] != null) {
+								oBooks[x] = oBooks[x + 1];
+								oBooks[x + 1] = null;
+								x = 0;
+							}
+						}
+					}
+					for(int x = 0; x < oBooks.length; x++) {
+						for(int y = 0; y < booksList.length; y++) {
+							if(oBooks[x] != null && booksList[y][0] != null) {
+								if(oBooks[x].equals(booksList[y][0])) {
+									oBooks[x] = booksList[y][1];
+								}
+							}
+						}
+					}
+					sum[3] = "";
+					for(int x = 0; x < oBooks.length; x++) {
+						if(oBooks[x] != null)
+							sum[3] = sum[3] + oBooks[x] + "\n";
+					}
+					
+					summary = "Name: " + sum[0] + " " + sum[1]
+							+ "\n\nBooks Checked Out: " + sum[2]
+							+ "\nBooks Overdue: " + sum[3];
+					JOptionPane.showMessageDialog(null, summary);
+					
+					/*for(int x = 0; x < nameList.length; x++) {
+						for(int y = 0; y < nameList[x].length; y++) {
+							nameList[x][y] = null;
+						}
+					}*/
+				}
+				catch(NullPointerException e) {
+					JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+				//Name, School, Grade, # of Books checked out, Books checked out
+			}
+			else if(checkedoutListPanel.isVisible()) {
+				String[] sum = new String[4];
+				try {
+					sum[0] = checkedoutList[checkedoutListValue][0];
+					for(int x = 0; x < booksList.length; x++) {
+						if(booksList[x][0] != null) {
+							if(booksList[x][0].equals(sum[0]))
+								sum[0] = booksList[x][1];
+						}
+					}
+					sum[1] = checkedoutList[checkedoutListValue][1] + " " + checkedoutList[checkedoutListValue][2];
+					sum[2] = checkedoutList[checkedoutListValue][3];
+					sum[3] = checkedoutList[checkedoutListValue][4];
+					
+					renew = new JButton("Renew");
+					renew.addActionListener(this);
+					
+					Object[] summary = {
+							"Book: ", sum[0],
+							"\nName: ", sum[1],
+							"\nChecked Out: ", sum[2],
+							"\nOverdue at: ", sum[3],
+							renew
+					};
+					JOptionPane.showMessageDialog(null, summary, "Checked Out", JOptionPane.INFORMATION_MESSAGE);
+				}
+				catch(NullPointerException e) {
+					JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+			else if(overdueListPanel.isVisible()) {
+				String[] sum = new String[4];
+				String summary = "";
+				try {
+					sum[0] = overdueList[overdueListValue][0];
+					for(int x = 0; x < booksList.length; x++) {
+						if(booksList[x][0] != null) {
+							if(booksList[x][0].equals(sum[0]))
+								sum[0] = booksList[x][1];
+						}
+					}
+					sum[1] = overdueList[overdueListValue][1] + " " + overdueList[overdueListValue][2];
+					sum[2] = overdueList[overdueListValue][3];
+					
+					summary = "Book: " + sum[0]
+							+ "\nName: " + sum[1]
+							+ "\nChecked Out: " + sum[2];
+					JOptionPane.showMessageDialog(null, summary, "Checked Out", JOptionPane.INFORMATION_MESSAGE);
+				}
+				catch(NullPointerException e) {
+					JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+			else if(booksListPanel.isVisible()) {
+				String[] sum = new String[7];
+				String summary = "";
+				try {
+					sum[0] = booksList[booksListValue][0];
+					sum[1] = booksList[booksListValue][1];
+					sum[2] = booksList[booksListValue][2];
+					sum[3] = booksList[booksListValue][3];
+					sum[4] = booksList[booksListValue][4];
+					
+					sum[5] = "";
+					for(int x = 0; x < checkedoutList.length; x++) {
+						if(checkedoutList[x][0] != null) {
+							if(booksList[booksListValue][0].equals(checkedoutList[x][0])) {
+								sum[5] = sum[5] + "\t" + checkedoutList[x][1] + " " + checkedoutList[x][2] + "\n\t\t\t";
+							}
+						}
+					}
+					sum[6] = "";
+					for(int x = 0; x < overdueList.length; x++) {
+						if(overdueList[x][0] != null) {
+							if(booksList[booksListValue][0].equals(overdueList[x][0])) {
+								sum[6] = sum[6] + "\t" + overdueList[x][1] + " " + overdueList[x][2] + "\n\t\t\t";
+							}
+						}
+					}
+					
+					if(sum[5].equals(""))
+						sum[5] = "N/A\n";
+					if(sum[6].equals(""))
+						sum[6] = "N/A";
+				
+					summary = "Serial of Book: " + sum[0]
+							+ "\nBook: " + sum[1]
+							+ "\nAuthor: " + sum[2]
+							+ "\nTotal in Inventory: " + sum[3]
+							+ "\nTotal in Stock: " + sum[4]
+							+ "\n\nChecked out to:	" + sum[5]
+							+ "Overdue: " + sum[6];
+					JOptionPane.showMessageDialog(null, summary, "Book", JOptionPane.INFORMATION_MESSAGE);
+				}
+				catch(NullPointerException e) {
+					JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}
@@ -1106,6 +1000,21 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				}
 				JComboBox<String> namesComboBox = new JComboBox<String>(namesList);
 				
+				String[] month = new String[12];
+				for(int x = 0; x < month.length; x++) {
+					if((Integer.toString(x)).length() == 1) {
+						month[x] = "0" + (Integer.toString(x + 1));
+					}
+					else {
+						month[x] = Integer.toString(x + 1);
+					}
+				}
+				JComboBox monthComboBox = new JComboBox(month);
+				monthComboBox.addActionListener(this);
+				String[] day = new String[31];
+				String year = new String();
+				
+				
 				String[] overdueListWeeks = new String[3];
 				for(int x = 0; x < overdueListWeeks.length; x++)
 					overdueListWeeks[x] = Integer.toString(x + 1) + " weeks";
@@ -1115,7 +1024,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				Object[] message = {
 						"Book: ", serialComboBox,
 						"Name: ", namesComboBox,
-						"Checked out at: ", "ADD TIME HERE",//ADD TIME HERE M8
+						"Checked out at: ", monthComboBox, dayComboBox, yearTextField,
 						"Overdue by: ", overdueComboBox,
 						delete
 				};
