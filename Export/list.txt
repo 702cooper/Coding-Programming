@@ -1,0 +1,12 @@
+//First Name, Last Name
+[NAMES] {
+}
+//Serial of Book, First Name, Last Name, When It Was Checked Out, How Long Till It's Overdue
+[CHECKEDOUT] {
+}
+//Serial of Book, First Name, Last Name, How Long It's Been Overdue
+[OVERDUE] {
+}
+//Serial Number, Book Name, Author, Total Inventory, Number in Stock
+[BOOKS] {
+}
