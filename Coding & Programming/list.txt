@@ -3,39 +3,39 @@
 	Ellissa, Collins
 	Hannah, Cain
 	Jupiter, Jackson
-	Marci, Parks
+	Marcy, Parks
 	Phil, Monicar
 	Rowan, McClain
 	Steve, Smith
 }
-//First Name, Last Name, Serial of Book, When It Was Checked Out, How Long Till It's Overdue
+//Serial of Book, First Name, Last Name, When It Was Checked Out, How Long Till It's Overdue
 [CHECKEDOUT] {
-	Hannah, Cain, 001
-	Jupiter, Jackson, 001
-	Jupiter, Jackson, 214
-	Jupiter, Jackson, 268
-	Jupiter, Jackson, 297
-	Jupiter, Jackson, 666
-	Marci, Parks, 004
-	Phil, Monicar, 003
-	Phil, Monicar, 004
-	Steve, Smith, 987
-	Steve, Smith, 879
+	000, Hannah, Cain
+	000, Jupiter, Jackson
+	003, Phil, Monicar
+	004, Marcy, Parks
+	004, Phil, Monicar
+	214, Jupiter, Jackson
+	297, Jupiter, Jackson
+	666, Ellissa, Collins
+	666, Jupiter, Jackson
+	879, Steve, Smith
+	879, Rowan, McClain
+	987, Steve, Smith
 }
-//First Name, Last Name, Serial of Book, How Long It's Been Overdue
+//Serial of Book, First Name, Last Name, How Long It's Been Overdue
 [OVERDUE] {
-	Marci, Parks, 004
+	004, Phil, Monicar
 }
-//Serial Number, Book Name, Author, Number in Stock, Total Inventory
+//Serial Number, Book Name, Author, Total Inventory, Number in Stock
 [BOOKS] {
-	001, The Walking Dead Compendium #1, Robert Kirkman, 1, 3
-	002, Going Out With The Boys 101, MemeLord7, 1, 2
-	003, Hockey Equipment, HockPro Magazine, 5, 6
-	004, Why Is My Marriage Failing?, John Cariani, 2, 3
-	214, Iliad, Homer, 3, 4
+	000, The Walking Dead Compendium, Robert Kirkman, 5, 1
+	003, Hockey Equipment, HockPro Magazine, 6, 5
+	004, Why Is My Marriage Failing?, John Cariani, 3, 2
+	214, Iliad, Homer, 4, 3
 	268, Aeneid, Virgil, 2, 2
-	297, Odyssey, Homer, 5, 6
+	297, Odyssey, Homer, 6, 5
 	666, H.P. Lovecraft Compendium, H.P. Lovecraft, 3, 3
-	879, To Kill a Mockingbird, Harper Lee, 2, 3
-	987, Pride and Prejudice, Jane Austen, 1, 2
+	879, To Kill a Mockingbird, Harper Lee, 3, 2
+	987, Pride and Prejudice, Jane Austen, 2, 1
 }

@@ -5,10 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.text.NumberFormatter;
 
 public class CodingProgramming extends JFrame implements ActionListener {
 	//static final int LIMIT = (2147483647 - 8) / 5;
@@ -20,10 +22,12 @@ public class CodingProgramming extends JFrame implements ActionListener {
 	JButton enter;
 	JButton view;
 	JButton edit;
+	static JOptionPane editOptionPane;
+	JButton renew;
 	JButton delete;
 	//Search
 	JTextField search;
-	String searchValue;
+	String searchValue = "";
 	JPanel searchPanel;
 	
 	//JOptionPane editOptionPane;
@@ -148,9 +152,8 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		String[] checkedoutListSort = new String[checkedoutList.length];
 		String[] temp = new String[checkedoutList.length];
 		for(int x = 0; x < checkedoutList.length; x++) {
-			temp[x] = checkedoutList[x][2];
+			temp[x] = checkedoutList[x][0];
 		}
-		temp = removeDuplicates(temp);
 		for(int x = 0; x < temp.length; x++) {
 			if(temp[x] != null && temp[x] != "")
 				checkedoutListSort[x] = temp[x];
@@ -186,9 +189,24 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		JLabel overdueListLabel = new JLabel("");
 		overdueListPanel.add(overdueListLabel);
 		overdueListList = new JList<String>(overdueDLM);
+		String[] overdueListSort = new String[overdueList.length];
 		for(int x = 0; x < overdueList.length; x++) {
 			if(overdueList[x][0] != null) {
-				overdueDLM.addElement(overdueList[x][0]);
+				overdueListSort[x] = overdueList[x][0];
+			}
+		}
+		for(int x = 0; x < overdueListSort.length; x++) {
+			for(int y = 0; y < booksList.length; y++) {
+				if(overdueListSort[x] != null && booksList[y][0] != null) {
+					if(booksList[y][0].equals(overdueListSort[x])) {
+						overdueListSort[x] = booksList[y][1];
+					}
+				}
+			}
+		}
+		for(int x = 0; x < overdueListSort.length; x++) {
+			if(overdueListSort[x] != null) {
+				overdueDLM.addElement(overdueListSort[x]);
 			}
 		}
 		overdueListList.addListSelectionListener(new ListSelectionListener() {
@@ -257,13 +275,13 @@ public class CodingProgramming extends JFrame implements ActionListener {
 		search.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent event) {
+				searchValue = search.getText();
 				if(nameListPanel.isVisible()) {
 					//JTextField text = (JTextField) event.getSource();
-					searchValue = search.getText();
 					nameDLM.clear();
 					for(int x = 0; x < nameList.length; x++) {
 						if(nameList[x][0] != null) {
-							if(nameList[x][0].contains(searchValue)) {
+							if(nameList[x][0].contains(searchValue) || nameList[x][1].contains(searchValue)) {
 								nameDLM.addElement(nameList[x][0]);
 							}
 						}
@@ -271,12 +289,94 @@ public class CodingProgramming extends JFrame implements ActionListener {
 					nameListPanel.validate();
 					nameListPanel.repaint();
 				}
+				else if(checkedoutListPanel.isVisible()) {
+					String[] bookTitle = new String[checkedoutList.length];
+					for(int x = 0; x < bookTitle.length; x++) {
+						for(int y = 0; y < booksList.length; y++) {
+							if(booksList[y][0] != null && checkedoutList[x][0] != null) {
+								if(booksList[y][0].equals(checkedoutList[x][0]))
+									bookTitle[x] = booksList[y][1];
+							}
+						}
+					}
+					
+					checkedoutDLM.clear();
+					for(int x = 0; x < checkedoutList.length; x++) {
+						if(checkedoutList[x][0] != null && checkedoutList[x][1] != null && checkedoutList[x][2] != null && bookTitle != null) {
+							if(checkedoutList[x][0].contains(searchValue) || checkedoutList[x][1].contains(searchValue) || checkedoutList[x][2].contains(searchValue) || bookTitle[x].contains(searchValue))
+								checkedoutDLM.addElement(bookTitle[x]);
+						}
+					}
+				}
+				else if(overdueListPanel.isVisible()) {
+					String[] bookTitle = new String[overdueList.length];
+					for(int x = 0; x < bookTitle.length; x++) {
+						for(int y = 0; y < overdueList.length; y++) {
+							if(overdueList[y][0] != null && overdueList[x][0] != null) {
+								if(overdueList[y][0].equals(overdueList[x][0]))
+									bookTitle[x] = booksList[y][1];
+							}
+						}
+					}
+					
+					overdueDLM.clear();
+					for(int x = 0; x < overdueList.length; x++) {
+						if(overdueList[x][0] != null && overdueList[x][1] != null && overdueList[x][2] != null && bookTitle[x] != null) {
+							if(overdueList[x][0].contains(searchValue) || overdueList[x][1].contains(searchValue) || overdueList[x][2].contains(searchValue) || bookTitle[x].contains(searchValue))
+								overdueDLM.addElement(bookTitle[x]);
+						}
+					}
+				}
+				else if(booksListPanel.isVisible()) {
+					booksDLM.clear();
+					for(int x = 0; x < booksList.length; x++) {
+						if(booksList[x][0] != null && booksList[x][1] != null && booksList[x][2] != null) {
+							if(booksList[x][0].contains(searchValue) || booksList[x][1].contains(searchValue) || booksList[x][2].contains(searchValue))
+								booksDLM.addElement(booksList[x][1]);
+						}
+					}
+				}
 			}
 		});
 	}
 	
+	@SuppressWarnings("static-access")
 	public void actionPerformed(ActionEvent event) {
 		Object control = event.getSource();
+		
+		String[][] searchNameList = new String[nameList.length][5];
+		for(int x = 0; x < nameList.length; x++) {
+			if(nameList[x][0] != null && nameList[x][1] != null) {
+				if(nameList[x][0].contains(searchValue) || nameList[x][1].contains(searchValue)) {
+					searchNameList[x] = nameList[x];
+				}
+			}
+		}
+		for(int x = 0; x < searchNameList.length; x++) {
+			if((x + 1) < searchNameList.length) {
+				if(searchNameList[x][0] == null && searchNameList[x + 1][0] != null) {
+					for(int y = 0; y < searchNameList[x].length; y++)
+						searchNameList[x][y] = searchNameList[x + 1][y];
+					for(int y = 0; y < searchNameList[x].length; y++)
+						searchNameList[x + 1][y] = null;
+					x = 0;
+				}
+			}
+		}
+		
+		for(int x = 0; x < searchNameList.length; x++) {
+			if(checkedoutList[x][0] != null)
+				System.out.println("\n" + x);
+			for(int y = 0; y < searchNameList[x].length; y++) {
+				if(searchNameList[x][0] != null)
+					System.out.println(searchNameList[x][y]);
+			}
+		}
+		
+		String[] searchCheckedoutList = new String[checkedoutList.length];
+		String[] searchOverdueList = new String[overdueList.length];
+		String[] searchBooksList = new String[booksList.length];
+		
 		if(control == sortBox) {
 			JComboBox<?> cb = (JComboBox<?>)event.getSource();
 			
@@ -307,353 +407,519 @@ public class CodingProgramming extends JFrame implements ActionListener {
 			}
 			//System.out.println("Selected from " + event.getStateChange());
 		}
-		else if(control == view){
-			if(nameListPanel.isVisible()) {
-				String[] sum = new String[4];
-				String summary = "";
-				try {
-					sum[0] = nameList[nameListValue][0];
-					sum[1] = nameList[nameListValue][1];
-					int mark = 0;
-					for(int x = 0; x < checkedoutList.length; x++) {
-						if(checkedoutList[x][0] != null && checkedoutList[x][1] != null && nameList[nameListValue][0] != null && nameList[nameListValue][1] != null) {
-							if(checkedoutList[x][0].equals(nameList[nameListValue][0]) && checkedoutList[x][1].equals(nameList[nameListValue][1])) {
-								mark++;
-							}
-						}
-					}
-					sum[2] = Integer.toString(mark);
-					
-					mark = 0;
-					for(int x = 0; x < overdueList.length; x++) {
-						if(overdueList[x][0] != null && nameList[nameListValue][0] != null) {
-							if(overdueList[x][0].equals(nameList[nameListValue][0])) {
-								mark++;
-							}
-						}
-					}
-					sum[3] = Integer.toString(mark);
-					
-					summary = "Name: " + sum[0] + " " + sum[1]
-							+ "\nNumber of Books Checked Out: " + sum[2]
-							+ "\nNumber of Books Overdue: " + sum[3];
-					JOptionPane.showMessageDialog(null, summary);
-				}
-				catch(NullPointerException e) {
-					JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
-				}
-				//Name, School, Grade, # of Books checked out, Books checked out
-			}
-			else if(checkedoutListPanel.isVisible()) {
-				String[] sum = new String[3];
-				String summary = "";
-				try {
-					sum[0] = checkedoutList[checkedoutListValue][2];
-					for(int x = 0; x < booksList.length; x++) {
-						if(booksList[x][0] != null) {
-							if(booksList[x][0].equals(sum[0]))
-								sum[0] = booksList[x][1];
-						}
-					}
-					sum[1] = checkedoutList[checkedoutListValue][0] + " " + checkedoutList[checkedoutListValue][1];
-					sum[2] = checkedoutList[checkedoutListValue][3];
-					
-					summary = "Book: " + sum[0]
-							+ "\nName(s): " + sum[1]
-							+ "\nChecked Out: " + sum[2];
-					JOptionPane.showMessageDialog(null, summary, "Checked Out", JOptionPane.INFORMATION_MESSAGE);
-				}
-				catch(NullPointerException e) {
-					JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
-				}
-				/*JOptionPane schoolUserOptionPane = new JOptionPane();
-				//JList schoolUserListList;
-				schoolUserView = new JButton("View");
-				schoolUserEdit = new JButton("Edit");
-				
-				schoolUserList = new String[userList.length];
-				for(int x = 0; x < userList.length; x++) {
-					if(userList[x][0] != null) {
-						if(userList[x][1].equals(schoolList[schoolListValue][0]))
-							schoolUserList[x] = userList[x][0];
-					}
-				}
-				
-				for(int x = 0; x < schoolUserList.length; x++) {
-					if((x + 1) < schoolUserList.length) {
-						if(schoolUserList[x] == null && schoolUserList[x + 1] != null) {
-							schoolUserList[x] = schoolUserList[x + 1];
-							schoolUserList[x + 1] = null;
-							x = -1;
-						}
-					}
-				}
-				
-				int mark = 0;
-				for(int x = 0; x < schoolUserList.length; x++) {
-					if(schoolUserList[x] != null)
-						mark++;
-				}
-				String[] schoolUserListSort = new String[mark];
-				for(int x = 0; x < schoolUserListSort.length; x++) {
-					if(schoolUserList[x] != null)
-						schoolUserListSort[x] = schoolUserList[x];
-				}
-				
-				schoolUserListList = new JList(schoolUserListSort);
-				schoolUserListList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-				schoolUserListList.addListSelectionListener(new ListSelectionListener() {
-					@Override
-					public void valueChanged(ListSelectionEvent event) {
-						JList list = (JList) event.getSource();
-						schoolUserListValue = list.getSelectedIndex();
+		else if(control == view) {
+			if(true) {
+				if(nameListPanel.isVisible()) {
+					String[] sum = new String[4];
+					String summary = "";
+					try {
+						sum[0] = searchNameList[nameListValue][0];
+						sum[1] = searchNameList[nameListValue][1];
 						
+						String[] books = new String[checkedoutList.length];
+						for(int x = 0; x < checkedoutList.length; x++) {
+							if(checkedoutList[x][1] != null && checkedoutList[x][2] != null && searchNameList[nameListValue][0] != null && searchNameList[nameListValue][1] != null) {
+								if(checkedoutList[x][1].equals(searchNameList[nameListValue][0]) && checkedoutList[x][2].equals(searchNameList[nameListValue][1])) {
+									books[x] = checkedoutList[x][0];
+								}
+							}
+						}
+						for(int x = 0; x < books.length; x++) {
+							if((x + 1) < books.length) {
+								if(books[x] == null && books[x + 1] != null) {
+									books[x] = books[x + 1];
+									books[x + 1] = null;
+									x = 0;
+								}
+							}
+						}
+						for(int x = 0; x < books.length; x++) {
+							for(int y = 0; y < booksList.length; y++) {
+								if(books[x] != null && booksList[y][0] != null) {
+									if(books[x].equals(booksList[y][0])) {
+										books[x] = booksList[y][1];
+									}
+								}
+							}
+						}
+						sum[2] = "";
+						for(int x = 0; x < books.length; x++) {
+							if(books[x] != null)
+								sum[2] = sum[2] + books[x] + "\n";
+						}
+						
+						String[] oBooks = new String[overdueList.length];
+						for(int x = 0; x < overdueList.length; x++) {
+							if(overdueList[x][1] != null && overdueList[x][2] != null && searchNameList[nameListValue][0] != null && searchNameList[nameListValue][1] != null) {
+								if(overdueList[x][1].equals(searchNameList[nameListValue][0]) && overdueList[x][2].equals(searchNameList[nameListValue][1])) {
+									oBooks[x] = overdueList[x][0];
+								}
+							}
+						}
+						for(int x = 0; x < oBooks.length; x++) {
+							if((x + 1) < oBooks.length) {
+								if(oBooks[x] == null && oBooks[x + 1] != null) {
+									oBooks[x] = oBooks[x + 1];
+									oBooks[x + 1] = null;
+									x = 0;
+								}
+							}
+						}
+						for(int x = 0; x < oBooks.length; x++) {
+							for(int y = 0; y < booksList.length; y++) {
+								if(oBooks[x] != null && booksList[y][0] != null) {
+									if(oBooks[x].equals(booksList[y][0])) {
+										oBooks[x] = booksList[y][1];
+									}
+								}
+							}
+						}
+						sum[3] = "";
+						for(int x = 0; x < oBooks.length; x++) {
+							if(oBooks[x] != null)
+								sum[3] = sum[3] + oBooks[x] + "\n";
+						}
+						
+						summary = "Name: " + sum[0] + " " + sum[1]
+								+ "\n\nBooks Checked Out: " + sum[2]
+								+ "\nBooks Overdue: " + sum[3];
+						JOptionPane.showMessageDialog(null, summary);
 					}
-				});
-				JScrollPane schoolUserListScroll = new JScrollPane(schoolUserListList, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-				schoolUserView.addActionListener(this);
-				schoolUserEdit.addActionListener(this);
-				
-				Object[] message = {
-						schoolUserListList,
-						schoolUserListScroll,
-						schoolUserView,
-						schoolUserEdit
-				};
-				JOptionPane.showConfirmDialog(null, message, schoolList[schoolListValue][0], JOptionPane.OK_CANCEL_OPTION);
-				
-				//Make the view and delete and idk i'm tired man*/
+					catch(NullPointerException e) {
+						JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+					//Name, School, Grade, # of Books checked out, Books checked out
+				}
+				else if(checkedoutListPanel.isVisible()) {
+					String[] sum = new String[4];
+					try {
+						sum[0] = checkedoutList[checkedoutListValue][0];
+						for(int x = 0; x < booksList.length; x++) {
+							if(booksList[x][0] != null) {
+								if(booksList[x][0].equals(sum[0]))
+									sum[0] = booksList[x][1];
+							}
+						}
+						sum[1] = checkedoutList[checkedoutListValue][1] + " " + checkedoutList[checkedoutListValue][2];
+						sum[2] = checkedoutList[checkedoutListValue][3];
+						sum[3] = checkedoutList[checkedoutListValue][4];
+						
+						renew = new JButton("Renew");
+						renew.addActionListener(this);
+						
+						Object[] summary = {
+								"Book: ", sum[0],
+								"\nName: ", sum[1],
+								"\nChecked Out: ", sum[2],
+								"\nOverdue at: ", sum[3],
+								renew
+						};
+						JOptionPane.showMessageDialog(null, summary, "Checked Out", JOptionPane.INFORMATION_MESSAGE);
+					}
+					catch(NullPointerException e) {
+						JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+				else if(overdueListPanel.isVisible()) {
+					String[] sum = new String[4];
+					String summary = "";
+					try {
+						sum[0] = overdueList[overdueListValue][0];
+						for(int x = 0; x < booksList.length; x++) {
+							if(booksList[x][0] != null) {
+								if(booksList[x][0].equals(sum[0]))
+									sum[0] = booksList[x][1];
+							}
+						}
+						sum[1] = overdueList[overdueListValue][1] + " " + overdueList[overdueListValue][2];
+						sum[2] = overdueList[overdueListValue][3];
+						
+						summary = "Book: " + sum[0]
+								+ "\nName: " + sum[1]
+								+ "\nChecked Out: " + sum[2];
+						JOptionPane.showMessageDialog(null, summary, "Checked Out", JOptionPane.INFORMATION_MESSAGE);
+					}
+					catch(NullPointerException e) {
+						JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+				else if(booksListPanel.isVisible()) {
+					String[] sum = new String[7];
+					String summary = "";
+					try {
+						sum[0] = booksList[booksListValue][0];
+						sum[1] = booksList[booksListValue][1];
+						sum[2] = booksList[booksListValue][2];
+						sum[3] = booksList[booksListValue][3];
+						sum[4] = booksList[booksListValue][4];
+						
+						sum[5] = "";
+						for(int x = 0; x < checkedoutList.length; x++) {
+							if(checkedoutList[x][0] != null) {
+								if(booksList[booksListValue][0].equals(checkedoutList[x][0])) {
+									sum[5] = sum[5] + "\t" + checkedoutList[x][1] + " " + checkedoutList[x][2] + "\n\t\t\t";
+								}
+							}
+						}
+						sum[6] = "";
+						for(int x = 0; x < overdueList.length; x++) {
+							if(overdueList[x][0] != null) {
+								if(booksList[booksListValue][0].equals(overdueList[x][0])) {
+									sum[6] = sum[6] + "\t" + overdueList[x][1] + " " + overdueList[x][2] + "\n\t\t\t";
+								}
+							}
+						}
+						
+						if(sum[5].equals(""))
+							sum[5] = "N/A\n";
+						if(sum[6].equals(""))
+							sum[6] = "N/A";
+					
+						summary = "Serial of Book: " + sum[0]
+								+ "\nBook: " + sum[1]
+								+ "\nAuthor: " + sum[2]
+								+ "\nTotal in Inventory: " + sum[3]
+								+ "\nTotal in Stock: " + sum[4]
+								+ "\n\nChecked out to:	" + sum[5]
+								+ "Overdue: " + sum[6];
+						JOptionPane.showMessageDialog(null, summary, "Book", JOptionPane.INFORMATION_MESSAGE);
+					}
+					catch(NullPointerException e) {
+						JOptionPane.showMessageDialog(null, "You haven't selected anything", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
 			}
 		}
+		else if(control == renew) {
+			//checkedoutList[checkedoutListValue][4]
+			//ADD TWO WEEKS TO THE THING
+		}
 		else if(control == edit) {
-			/*enterCheck = true;
+			enterCheck = true;
 			editOptionPane = new JOptionPane();
 			if(nameListPanel.isVisible()) {
-				String name = null;
-				String school = null;
-				String grade = null;
-				String num = null;
-				String cereal = null;
-				JTextField nameTextField = new JTextField(nameList[nameListValue][0]);
+				String firstName = null;
+				String lastName = null;
+				JTextField firstNameTextField = new JTextField(nameList[nameListValue][0]);
+				JTextField lastNameTextField = new JTextField(nameList[nameListValue][1]);
 				
-				//schoolComboBox array setup
-				int mark = 0;
-				for(int x = 0; x < schoolList.length; x++) {
-					if(schoolList[x][0] != null)
-						mark++;
-				}
-				String[] schoolListSort = new String[mark];
-				for(int x = 0; x < schoolListSort.length; x++) {
-					if(schoolList[x][0] != null)
-						schoolListSort[x] = schoolList[x][0];
-				}
-				JComboBox schoolComboBox = new JComboBox(schoolListSort);
-				mark = 0;
-				for(int x = 0; x < schoolListSort.length; x++) {
-					mark++;
-					if(nameList[nameListValue][1].equals(schoolListSort[x])) {
-						mark--;
-						x = nameList.length + 1;
-					}
-				}
-				schoolComboBox.setSelectedIndex(mark);
-				
-				//gradeComboBox array setup
-				mark = 0;
-				for(int x = 0; x < gradeList.length; x++) {
-					if(gradeList[x][0] != null)
-						mark++;
-				}
-				String[] gradeListSort = new String[mark];
-				for(int x = 0; x < gradeListSort.length; x++) {
-					if(gradeListSort != null)
-						gradeListSort[x] = gradeList[x][0];
-				}
-				JComboBox gradeComboBox = new JComboBox(gradeListSort);
-				mark = 0;
-				for(int x = 0; x < gradeListSort.length; x++) {
-					mark++;
-					if(nameList[nameListValue][2].equals(gradeListSort[x])) {
-						mark--;
-						x = nameList.length + 1;
-					}
-				}
-				gradeComboBox.setSelectedIndex(mark);
-				
-				JTextField numTextField = new JTextField(nameList[nameListValue][3]);
-				JTextField cerealTextField = new JTextField(nameList[nameListValue][4]);
 				delete = new JButton("Delete");
 				delete.addActionListener(this);
 				Object[] message = {
-					"Name:", nameTextField,
-			    	"School:", schoolComboBox,
-			    	"Grade:", gradeComboBox,
-			    	"Number of Books Checked Out:", numTextField,
-			    	"Serial of Books:", cerealTextField,
+					"First Name:", firstNameTextField,
+			    	"Last Name:", lastNameTextField,
 			    	delete
 				};
 				int option = editOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
 				if (option == JOptionPane.OK_OPTION) {
-			    	name = nameTextField.getText();
-			    	school = schoolList[(schoolComboBox.getSelectedIndex())][0];
-			    	grade = gradeList[(gradeComboBox.getSelectedIndex())][0];
-			    	num = numTextField.getText();
-			    	cereal = cerealTextField.getText();
-					nameList[nameListValue][0] = name;
-					nameList[nameListValue][1] = school;
-					nameList[nameListValue][2] = grade;
-					nameList[nameListValue][3] = num;
-					nameList[nameListValue][4] = cereal;
+					firstName = firstNameTextField.getText();
+			    	lastName = lastNameTextField.getText();
+			    	
+			    	for(int x = 0; x < checkedoutList.length; x++) {
+						if(checkedoutList[x][0] != null) {
+							if(checkedoutList[x][1].equals(nameList[nameListValue][0]) && checkedoutList[x][2].equals(nameList[nameListValue][1])) {
+								checkedoutList[x][1] = firstName;
+								checkedoutList[x][2] = lastName;
+							}
+						}
+					}
+					for(int x = 0; x < overdueList.length; x++) {
+						if(overdueList[x][0] != null) {
+							if(overdueList[x][1].equals(nameList[nameListValue][0]) && overdueList[x][2].equals(nameList[nameListValue][1])) {
+								overdueList[x][1] = firstName;
+								overdueList[x][2] = lastName;
+							}
+						}
+					}
+			    	
+			    	nameList[nameListValue][0] = firstName;
+					nameList[nameListValue][1] = lastName;
+					
 					nameDLM.add(nameListValue, nameList[nameListValue][0]);
 					nameDLM.removeElementAt(nameListValue);
 					nameListPanel.validate();
 					nameListPanel.repaint();
 				}
 			}
-			else if(schoolListPanel.isVisible()) {
-				String school = null;
-				JTextField schoolTextField = new JTextField(schoolList[schoolListValue][0]);
-				delete = new JButton("Delete");
-				delete.addActionListener(this);
-				Object[] message = {
-						"School:", schoolTextField,
-						delete
-				};
-				int option = editOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
-				if (option == JOptionPane.OK_OPTION) {
-					school = schoolTextField.getText();
-					
-					for(int x = 0; x < nameList.length; x++) {
-						if(nameList[x][1] != null) {
-							if(nameList[x][1].equals(schoolList[schoolListValue][0])) {
-								nameList[x][1] = school;
-							}
-						}
-					}
-					
-					schoolList[schoolListValue][0] = school;
-					schoolDLM.add(schoolListValue, schoolList[schoolListValue][0]);
-					schoolDLM.removeElementAt(schoolListValue);
-					schoolListPanel.validate();
-					schoolListPanel.repaint();
-				}
-			}
-			else if(gradeListPanel.isVisible()) {
-				String grade = null;
-				String[] gradeSelections = new String[14];
-				for(int x = 0; x < gradeSelections.length; x++) {
-					int mark = 0;
-					String temp = null;
-					if(x == 0)
-						temp = "Pre-K";
-					else if(x == 1)
-						temp = "Kinder";
-					else if(x >= 2)
-						temp = (Integer.toString(x - 1));
-					
-					for(int y = 0; y < gradeList.length; y++) {
-						if(gradeList[y][0] != null) {
-							if(gradeList[y][0].equals(temp))
-								mark++;
-						}
-					}
-					if(mark == 0) {
-						gradeSelections[x] = temp;
-					}
-				}
-				gradeSelections[Integer.parseInt(gradeList[gradeListValue][0])] = gradeList[gradeListValue][0];
-				for(int x = 0; x < gradeSelections.length; x++) {
-					if((x + 1) < gradeSelections.length) {
-						if(gradeSelections[x] == null && gradeSelections[x + 1] != null) {
-							gradeSelections[x] = gradeSelections[x + 1];
-							gradeSelections[x + 1] = null;
-							x = 0;
-						}
-					}
-				}
+			else if(checkedoutListPanel.isVisible()) {
+				String serial = null;
+				String name = null;
+				String firstName = null;
+				String lastName = null;
 				
 				int mark = 0;
-				for(int x = 0; x < gradeSelections.length; x++) {
-					if(gradeSelections[x] != null)
+				for(int x = 0; x < booksList.length; x++) {
+					if(booksList[x][0] != null)
 						mark++;
 				}
-				String[] gradeSelectionsSort = new String[mark];
-				for(int x = 0; x < gradeSelectionsSort.length; x++) {
-					if(gradeSelections[x] != null)
-						gradeSelectionsSort[x] = gradeSelections[x];
+				String[] serialList = new String[mark];
+				for(int x = 0; x < serialList.length; x++) {
+					serialList[x] = booksList[x][1];
 				}
+				JComboBox<String> serialComboBox = new JComboBox<String>(serialList);
+				String temp = "";
+				for(int x = 0; x < booksList.length; x++) {
+					if(booksList[x][0] != null && booksList[x][0].equals(checkedoutList[checkedoutListValue][0])) {
+						temp = booksList[x][1];
+					}
+				}
+				serialComboBox.setSelectedItem(temp);
 				
-				JComboBox gradeComboBox = new JComboBox(gradeSelectionsSort);
-				gradeComboBox.setSelectedItem(gradeList[gradeListValue][0]);
+				mark = 0;
+				for(int x = 0; x < nameList.length; x++) {
+					if(nameList[x][0] != null)
+						mark++;
+				}
+				String[] namesList = new String[mark];
+				for(int x = 0; x < namesList.length; x++) {
+					namesList[x] = nameList[x][0] + " " + nameList[x][1];
+				}
+				JComboBox<String> namesComboBox = new JComboBox<String>(namesList);
+				namesComboBox.setSelectedItem(checkedoutList[checkedoutListValue][1] + " " + checkedoutList[checkedoutListValue][2]);
 				
 				delete = new JButton("Delete");
 				delete.addActionListener(this);
 				Object[] message = {
-						"Grade:", gradeComboBox,
+						"Book: ", serialComboBox,
+						"Name: ", namesComboBox,
+						"Checked out at: ", checkedoutList[checkedoutListValue][3],
+						"Overdue by: ", checkedoutList[checkedoutListValue][4],
 						delete
 				};
 				int option = editOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
 				if(option == JOptionPane.OK_OPTION) {
-					grade = gradeSelectionsSort[gradeComboBox.getSelectedIndex()];
-					for(int x = 0; x < gradeList.length; x++) {
-						if(gradeList[x][0] == null) {
-							gradeList[x][0] = grade;
-							
-							mark = 0;
-							for(int y = 0; y < gradeList.length; y++) {
-								if(gradeList[y][0] != null)
-									mark++;
-							}
-							String[] gradeListSort = new String[mark];
-							for(int y = 0; y < gradeListSort.length; y++) {
-								if(gradeList[y][0] != null)
-									gradeListSort[y] = gradeList[y][0];
-							}
-							
-							for(int y = 0; y < gradeListSort.length; y++) {
-								if(!isInteger(gradeListSort[y])) {
-									if(y != 0) {
-										String temp = gradeListSort[y - 1];
-										gradeListSort[y - 1] = gradeListSort[y];
-										gradeListSort[y] = temp;
-										temp = "";
-										y = 0;
-									}
+					serial = serialList[serialComboBox.getSelectedIndex()];
+					name = namesList[namesComboBox.getSelectedIndex()];
+					
+					for(int x = 0; x < booksList.length; x++) {
+						if(booksList[x][0] != null && serial.equals(booksList[x][1]))
+							serial = booksList[x][0];
+					}
+					
+					temp = "";
+					for(int x = 0; x < name.length(); x++) {
+						if(name.charAt(x) == ' ') {
+							firstName = temp;
+							temp = "";
+						}
+						else if(name.charAt(x) != ' ')
+							temp += name.charAt(x);
+					}
+					lastName = temp;
+					
+					checkedoutList[checkedoutListValue][0] = serial;
+					checkedoutList[checkedoutListValue][1] = firstName;
+					checkedoutList[checkedoutListValue][2] = lastName;
+					
+					temp = "";
+					for(int y = 0; y < booksList.length; y++) {
+						if(booksList[y][0] != null) {
+							if(checkedoutList[checkedoutListValue][0].equals(booksList[y][0]))
+								temp = booksList[y][1];
+						}
+					}
+					checkedoutDLM.add(checkedoutListValue, temp);
+					checkedoutDLM.removeElementAt(checkedoutListValue);
+					checkedoutListPanel.repaint();
+					checkedoutListPanel.validate();
+				}
+			}
+			else if(overdueListPanel.isVisible()) {
+				String serial = null;
+				String name = null;
+				String firstName = null;
+				String lastName = null;
+				
+				int mark = 0;
+				for(int x = 0; x < booksList.length; x++) {
+					if(booksList[x][0] != null)
+						mark++;
+				}
+				String[] serialList = new String[mark];
+				for(int x = 0; x < serialList.length; x++) {
+					serialList[x] = booksList[x][1];
+				}
+				JComboBox<String> serialComboBox = new JComboBox<String>(serialList);
+				String temp = "";
+				for(int x = 0; x < booksList.length; x++) {
+					if(booksList[x][0] != null && booksList[x][0].equals(overdueList[overdueListValue][0])) {
+						temp = booksList[x][1];
+					}
+				}
+				serialComboBox.setSelectedItem(temp);
+				
+				mark = 0;
+				for(int x = 0; x < nameList.length; x++) {
+					if(nameList[x][0] != null)
+						mark++;
+				}
+				String[] namesList = new String[mark];
+				for(int x = 0; x < namesList.length; x++) {
+					namesList[x] = nameList[x][0] + " " + nameList[x][1];
+				}
+				JComboBox<String> namesComboBox = new JComboBox<String>(namesList);
+				namesComboBox.setSelectedItem(overdueList[overdueListValue][1] + " " + overdueList[overdueListValue][2]);
+				
+				delete = new JButton("Delete");
+				delete.addActionListener(this);
+				Object[] message = {
+						"Book: ", serialComboBox,
+						"Name: ", namesComboBox,
+						"Checked out at: ", overdueList[overdueListValue][3],
+						"Overdue by: ", overdueList[overdueListValue][4],
+						delete
+				};
+				int option = editOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
+				if(option == JOptionPane.OK_OPTION) {
+					serial = serialList[serialComboBox.getSelectedIndex()];
+					name = namesList[namesComboBox.getSelectedIndex()];
+					
+					for(int x = 0; x < booksList.length; x++) {
+						if(booksList[x][0] != null && serial.equals(booksList[x][1]))
+							serial = booksList[x][0];
+					}
+					
+					temp = "";
+					for(int x = 0; x < name.length(); x++) {
+						if(name.charAt(x) == ' ') {
+							firstName = temp;
+							temp = "";
+						}
+						else if(name.charAt(x) != ' ')
+							temp += name.charAt(x);
+					}
+					lastName = temp;
+					
+					overdueList[overdueListValue][0] = serial;
+					overdueList[overdueListValue][1] = firstName;
+					overdueList[overdueListValue][2] = lastName;
+					
+					temp = "";
+					for(int y = 0; y < booksList.length; y++) {
+						if(booksList[y][0] != null) {
+							if(overdueList[overdueListValue][0].equals(booksList[y][0]))
+								temp = booksList[y][1];
+						}
+					}
+					overdueDLM.add(overdueListValue, temp);
+					overdueDLM.removeElementAt(overdueListValue);
+					overdueListPanel.repaint();
+					overdueListPanel.validate();
+				}
+			}
+			else if(booksListPanel.isVisible()) {
+				String serial = null;
+				String book = null;
+				String author = null;
+				String total = null;
+				
+				//total textfield
+				String[] totalList = new String[21];
+				for(int x = 0; x < totalList.length; x++)
+					totalList[x] = Integer.toString(x);
+				JComboBox<String> totalComboBox = new JComboBox<String>(totalList);
+				totalComboBox.setSelectedIndex(Integer.parseInt(booksList[booksListValue][3]));
+				
+				JTextField bookTextField = new JTextField(booksList[booksListValue][1]);
+				JTextField authorTextField = new JTextField(booksList[booksListValue][2]);
+				
+				//serial combobox
+				String[] serialList = new String[1000];
+				for(int x = 0; x < serialList.length; x++) {
+					String temp;
+					if(x < 10)
+						temp = "00" + Integer.toString(x);
+					else if(x > 9 && x < 100)
+						temp = "0" + Integer.toString(x);
+					else
+						temp = Integer.toString(x);
+					
+					boolean mark = false;
+					for(int y = 0; y < booksList.length; y++) {
+						if(booksList[y][0] != null) {
+							if(booksList[y][0].equals(temp)) {
+								if(!temp.equals(booksList[booksListValue][0])) {
+									mark = true;
+									y = booksList.length + 1;
 								}
-								else if(y != gradeListSort.length && y != gradeListSort.length - 1) {
-									if(isInteger(gradeListSort[y]) && isInteger(gradeListSort[y + 1]) && 
-											Integer.parseInt(gradeListSort[y]) > Integer.parseInt(gradeListSort[y + 1])) {
-										String temp = gradeListSort[y + 1];
-										gradeListSort[y + 1] = gradeListSort[y];
-										gradeListSort[y] = temp;
-										temp = "";
-										y = 0;
-									}
-								}
 							}
-							
-							for(int y = 0; y < gradeListSort.length; y++) {
-								if(gradeListSort != null)
-									gradeList[y][0] = gradeListSort[y];
-							}
-							
-							gradeDLM.clear();
-							for(int y = 0; y < gradeListSort.length; y++) {
-								if(gradeListSort[y] != null)
-									gradeDLM.addElement(gradeListSort[y]);
-							}
-							gradeListPanel.validate();
-							gradeListPanel.repaint();
-							x = gradeList.length + 1;
+						}
+					}
+					if(!mark) {
+						serialList[x] = temp;
+					}
+				}
+				for(int x = 0; x < serialList.length; x++) {
+					if((x + 1) < serialList.length) {
+						if(serialList[x] == null && serialList[x + 1] != null) {
+							serialList[x] = serialList[x + 1];
+							serialList[x + 1] = null;
+							x = 0;
 						}
 					}
 				}
-			}*/
+				int mark = 0;
+				for(int x = 0; x < serialList.length; x++) {
+					if(serialList[x] != null)
+						mark++;
+				}
+				String[] serialListSort = new String[mark];
+				for(int x = 0; x < serialListSort.length; x++)
+					serialListSort[x] = serialList[x];
+				JComboBox<String> serialComboBox = new JComboBox<String>(serialListSort);
+				mark = 0;
+				for(int x = 0; x < serialListSort.length; x++) {
+					if(serialListSort[x].equals(booksList[booksListValue][0])) {
+						mark = x;
+						x = booksList.length + 1;
+					}
+				}
+				serialComboBox.setSelectedIndex(mark);
+				
+				delete = new JButton("Delete");
+				delete.addActionListener(this);
+				Object[] message = {
+						"Serial Number: ", serialComboBox,
+						"Book Name: ", bookTextField,
+						"Author Name: ", authorTextField,
+						"Total in Inventory: ", totalComboBox,
+						delete
+				};
+				int option = editOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
+				if(option == JOptionPane.OK_OPTION) {
+					serial = serialList[serialComboBox.getSelectedIndex()];
+					book = bookTextField.getText();
+					author = authorTextField.getText();
+					total = totalList[totalComboBox.getSelectedIndex()];
+					
+					for(int x = 0; x < checkedoutList.length; x++) {
+						if(checkedoutList[x][0] != null && checkedoutList[x][0].equals(booksList[booksListValue][0])) {
+							checkedoutList[x][0] = serial;
+						}
+					}
+
+					for(int x = 0; x < overdueList.length; x++) {
+						if(overdueList[x][0] != null && overdueList[x][0].equals(booksList[booksListValue][0])) {
+							overdueList[x][0] = serial;
+						}
+					}
+					
+					booksList[booksListValue][0] = serial;
+					booksList[booksListValue][1] = book;
+					booksList[booksListValue][2] = author;
+					booksList[booksListValue][3] = total;
+					
+					booksDLM.add(checkedoutListValue, booksList[booksListValue][1]);
+					booksDLM.removeElementAt(booksListValue);
+					booksListPanel.repaint();
+					booksListPanel.validate();
+				}
+			}
 		}
 		if(control == delete) {
 			if(nameListPanel.isVisible()) {
-				/*Object[] warningMessage = {
-						"Are you sure you want to delete this user?"
+				Object[] warningMessage = {
+						"Are you sure you want to delete this name?"
 				};
 				int option = JOptionPane.showConfirmDialog(null, warningMessage, "Warning", JOptionPane.YES_NO_OPTION);
 				if(option == JOptionPane.YES_OPTION) {
@@ -674,119 +940,136 @@ public class CodingProgramming extends JFrame implements ActionListener {
 					nameDLM.removeElementAt(nameListValue);
 					nameListPanel.validate();
 					nameListPanel.repaint();
-				}*/
-			}
-			else if(checkedoutListPanel.isVisible()) {
-				/*Object[] warningMessage = {
-						"Are you sure you want to delete this school?"
-				};
-				int option = JOptionPane.showConfirmDialog(null, warningMessage, "Warning", JOptionPane.YES_NO_OPTION);
-				if(option == JOptionPane.YES_OPTION) {
-					for(int x = 0; x < nameList.length; x++) {
-						if(nameList[x][1] != null) {
-							if(nameList[x][1] == schoolList[schoolListValue][0]) {
-								nameList[x][1] = schoolList[0][0];
-							}
-						}
-					}
-					
-					schoolList[schoolListValue][0] = null;
-					for(int x = 0; x < schoolList.length; x++) {
-						if((x + 1) < schoolList.length) {
-							if(schoolList[x][0] == null && schoolList[x + 1][0] != null) {
-								schoolList[x][0] = schoolList[x + 1][0];
-								schoolList[x + 1][0] = null;
-							}
-						}
-					}
-					editOptionPane.getRootFrame().dispose();
-					schoolDLM.removeElementAt(schoolListValue);
-					schoolListPanel.validate();
-					schoolListPanel.repaint();
 				}
 			}
-			else if(gradeListPanel.isVisible()) {
+			else if(checkedoutListPanel.isVisible()) {
 				Object[] warningMessage = {
-						"Are you sure you want to delete this grade?"
+						"Are you sure you want to delete this check out?"
 				};
 				int option = JOptionPane.showConfirmDialog(null, warningMessage, "Warning", JOptionPane.YES_NO_OPTION);
 				if(option == JOptionPane.YES_OPTION) {
-					gradeList[gradeListValue][0] = null;
+					for(int x = 0; x < checkedoutList[checkedoutListValue].length; x++)
+						checkedoutList[checkedoutListValue][x] = null;
 					
-					for(int x = 0; x < gradeList.length; x++) {
-						if((x + 1) < gradeList.length) {
-							if(gradeList[x][0] == null && gradeList[x + 1][0] != null) {
-								gradeList[x][0] = gradeList[x + 1][0];
-								gradeList[x + 1][0] = null;
+					for(int x = 0; x < checkedoutList.length; x++) {
+						if((x + 1) < checkedoutList.length) {
+							if(checkedoutList[x][0] == null && checkedoutList[x + 1][0] != null) {
+								for(int y = 0; y < checkedoutList[x].length; y++) {
+									checkedoutList[x][y] = checkedoutList[x + 1][y];
+									checkedoutList[x + 1][y] = null;
+								}
 							}
 						}
 					}
 					editOptionPane.getRootFrame().dispose();
-					gradeDLM.removeElementAt(gradeListValue);
-					gradeListPanel.validate();
-					gradeListPanel.repaint();
-				}*/
+					checkedoutDLM.removeElementAt(checkedoutListValue);
+					checkedoutListPanel.validate();
+					checkedoutListPanel.repaint();
+				}
+			}
+			else if(overdueListPanel.isVisible()) {
+				Object[] warningMessage = {
+						"Are you sure you want to delete this overdue check out?"
+				};
+				int option = JOptionPane.showConfirmDialog(null, warningMessage, "Warning", JOptionPane.YES_NO_OPTION);
+				if(option == JOptionPane.YES_OPTION) {
+					for(int x = 0; x < overdueList[overdueListValue].length; x++)
+						overdueList[overdueListValue][x] = null;
+					
+					for(int x = 0; x < overdueList.length; x++) {
+						if((x + 1) < overdueList.length) {
+							if(overdueList[x][0] == null && overdueList[x + 1][0] != null) {
+								for(int y = 0; y < overdueList[x].length; y++) {
+									overdueList[x][y] = overdueList[x + 1][y];
+									overdueList[x + 1][y] = null;
+								}
+							}
+						}
+					}
+					editOptionPane.getRootFrame().dispose();
+					overdueDLM.removeElementAt(overdueListValue);
+					overdueListPanel.validate();
+					overdueListPanel.repaint();
+				}
+			}
+			else if(booksListPanel.isVisible()) {
+				Object[] warningMessage = {
+						"Are you sure you want to delete this book?"
+				};
+				int option = JOptionPane.showConfirmDialog(null, warningMessage, "Warning", JOptionPane.YES_NO_OPTION);
+				if(option == JOptionPane.YES_OPTION) {
+					//removing book from checkedout
+					for(int x = 0; x < checkedoutList.length; x++) {
+						if(checkedoutList[x][0] != null && checkedoutList[x][0].equals(booksList[booksListValue][0])) {
+							checkedoutList[x][0] = null;
+							checkedoutDLM.removeElementAt(x);
+							for(int y = x; y < checkedoutList.length; y++) {
+								if(checkedoutList[y + 1][0] != null) {
+									checkedoutList[y] = checkedoutList[y + 1];
+									checkedoutList[y + 1] = null;
+								}
+							}
+						}
+					}
+					checkedoutListPanel.repaint();
+					checkedoutListPanel.validate();
+					
+					//removing book from overdue
+					for(int x = 0; x < overdueList.length; x++) {
+						if(overdueList[x][0] != null && overdueList[x][0].equals(booksList[booksListValue][0])) {
+							overdueList[x][0] = null;
+							overdueDLM.removeElementAt(x);
+							for(int y = x; y < overdueList.length; y++) {
+								if(overdueList[y + 1][0] != null) {
+									overdueList[y] = overdueList[y + 1];
+									overdueList[y + 1] = null;
+								}
+							}
+						}
+					}
+					overdueListPanel.repaint();
+					overdueListPanel.validate();
+					
+					for(int x = 0; x < booksList[booksListValue].length; x++)
+						booksList[booksListValue][x] = null;
+					
+					for(int x = 0; x < booksList.length; x++) {
+						if((x + 1) < booksList.length) {
+							if(booksList[x][0] == null && booksList[x + 1][0] != null) {
+								for(int y = 0; y < booksList[x].length; y++) {
+									booksList[x][y] = booksList[x + 1][y];
+									booksList[x + 1][y] = null;
+								}
+							}
+						}
+					}
+					editOptionPane.getRootFrame().dispose();
+					booksDLM.removeElementAt(booksListValue);
+					booksListPanel.validate();
+					booksListPanel.repaint();
+				}
 			}
 		}
 		else if(control == enter) {
-			/*enterCheck = true;
+			enterCheck = true;
 			if(nameListPanel.isVisible()) {
-				String name = null;
-				String school = null;
-				String grade = null;
-				String num = null;
-				String cereal = null;
-				JTextField nameTextField = new JTextField();
+				String firstName = null;
+				String lastName = null;
+				JTextField firstNameTextField = new JTextField();
+				JTextField lastNameTextField = new JTextField();
 				
-				//schoolComboBox array setup
-				int mark = 0;
-				for(int x = 0; x < schoolList.length; x++) {
-					if(schoolList[x][0] != null)
-						mark++;
-				}
-				String[] schoolListSort = new String[mark];
-				for(int x = 0; x < schoolListSort.length; x++) {
-					if(schoolList[x][0] != null)
-						schoolListSort[x] = schoolList[x][0];
-				}
-				JComboBox schoolComboBox = new JComboBox(schoolListSort);
-				
-				//gradeComboBox array setup
-				mark = 0;
-				for(int x = 0; x < gradeList.length; x++) {
-					if(gradeList[x][0] != null)
-						mark++;
-				}
-				String[] gradeListSort = new String[mark];
-				for(int x = 0; x < gradeListSort.length; x++) {
-					if(gradeListSort != null)
-						gradeListSort[x] = gradeList[x][0];
-				}
-				JComboBox gradeComboBox = new JComboBox(gradeListSort);
-				
-				JTextField numTextField = new JTextField();
-				JTextField cerealTextField = new JTextField();
 				Object[] message = {
-					"Name:", nameTextField,
-			    	"School:", schoolComboBox,
-			    	"Grade:", gradeComboBox,
-			    	"Number of Books Checked Out:", numTextField,
-			    	"Serial of Books:", cerealTextField,
+					"First Name: ", firstNameTextField,
+			    	"Last Name: :", lastNameTextField
 				};
 				int option = JOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
 				if (option == JOptionPane.OK_OPTION) {
-			    	name = nameTextField.getText();
-			    	school = schoolList[(schoolComboBox.getSelectedIndex())][0];
-			    	grade = gradeList[(gradeComboBox.getSelectedIndex())][0];
-			    	num = numTextField.getText();
-			    	cereal = cerealTextField.getText();
+					firstName = firstNameTextField.getText();
+			    	lastName = lastNameTextField.getText();
 					for(int x = 0; x < nameList.length; x++) {
 						if(nameList[x][0] == null) {
-							nameList[x][0] = name;
-							nameList[x][1] = school;
-							nameList[x][2] = grade;
-							nameList[x][3] = num;
-							nameList[x][4] = cereal;
+							nameList[x][0] = firstName;
+							nameList[x][1] = lastName;
 							nameDLM.addElement(nameList[x][0]);
 							nameListPanel.validate();
 							nameListPanel.repaint();
@@ -795,132 +1078,187 @@ public class CodingProgramming extends JFrame implements ActionListener {
 					}
 				}
 			}
-			else if(schoolListPanel.isVisible()) {
-				String school = null;
-				JTextField schoolTextField = new JTextField();
+			else if(checkedoutListPanel.isVisible()) {
+				String serial = null;
+				String name = null;
+				String firstName = null;
+				String lastName = null;
+				
+				int mark = 0;
+				for(int x = 0; x < booksList.length; x++) {
+					if(booksList[x][0] != null)
+						mark++;
+				}
+				String[] serialList = new String[mark];
+				for(int x = 0; x < serialList.length; x++) {
+					serialList[x] = booksList[x][1];
+				}
+				JComboBox<String> serialComboBox = new JComboBox<String>(serialList);
+				
+				mark = 0;
+				for(int x = 0; x < nameList.length; x++) {
+					if(nameList[x][0] != null)
+						mark++;
+				}
+				String[] namesList = new String[mark];
+				for(int x = 0; x < namesList.length; x++) {
+					namesList[x] = nameList[x][0] + " " + nameList[x][1];
+				}
+				JComboBox<String> namesComboBox = new JComboBox<String>(namesList);
+				
+				String[] overdueListWeeks = new String[3];
+				for(int x = 0; x < overdueListWeeks.length; x++)
+					overdueListWeeks[x] = Integer.toString(x + 1) + " weeks";
+				JComboBox<String> overdueComboBox = new JComboBox<String>(overdueListWeeks);
+				overdueComboBox.setSelectedIndex(1);
+				
 				Object[] message = {
-						"School Name:", schoolTextField
+						"Book: ", serialComboBox,
+						"Name: ", namesComboBox,
+						"Checked out at: ", "ADD TIME HERE",//ADD TIME HERE M8
+						"Overdue by: ", overdueComboBox,
+						delete
 				};
 				int option = JOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
 				if(option == JOptionPane.OK_OPTION) {
-					school = schoolTextField.getText();
-					for(int x = 0; x < schoolList.length; x++) {
-						if(schoolList[x][0] == null) {
-							schoolList[x][0] = school;
-							schoolDLM.addElement(schoolList[x][0]);
-							schoolListPanel.validate();
-							schoolListPanel.repaint();
-							x = schoolList.length + 1;
+					for(int x = 0; x < checkedoutList.length; x++) {
+						if(checkedoutList[x][0] == null) {
+							serial = serialList[serialComboBox.getSelectedIndex()];
+							name = namesList[namesComboBox.getSelectedIndex()];
+							
+							for(int y = 0; y < booksList.length; y++) {
+								if(booksList[y][0] != null && serial.equals(booksList[y][1])) {
+									serial = booksList[y][0];
+									booksList[y][4] = Integer.toString(Integer.parseInt(booksList[y][4]) - 1);
+									if(booksList[y][4].equals("-1")) {
+										JOptionPane.showMessageDialog(null, "There are not enough books in inventory", "Error", JOptionPane.ERROR_MESSAGE);
+										return;
+									}
+								}
+							}
+							
+							String temp = "";
+							for(int y = 0; y < name.length(); y++) {
+								if(name.charAt(y) == ' ') {
+									firstName = temp;
+									temp = "";
+								}
+								else if(name.charAt(y) != ' ')
+									temp += name.charAt(y);
+							}
+							lastName = temp;
+							
+							checkedoutList[x][0] = serial;
+							checkedoutList[x][1] = firstName;
+							checkedoutList[x][2] = lastName;
+							
+							temp = "";
+							for(int y = 0; y < booksList.length; y++) {
+								if(booksList[y][0] != null) {
+									if(checkedoutList[x][0].equals(booksList[y][0]))
+										temp = booksList[y][1];
+								}
+							}
+							checkedoutDLM.addElement(temp);
+							checkedoutListPanel.repaint();
+							checkedoutListPanel.validate();
+							x = checkedoutList.length + 1;
 						}
 					}
 				}
 			}
-			else if(gradeListPanel.isVisible()) {
-				String grade = null;
-				String[] gradeSelections = new String[14];
-				for(int x = 0; x < gradeSelections.length; x++) {
-					int mark = 0;
-					String temp = null;
-					if(x == 0)
-						temp = "Pre-K";
-					else if(x == 1)
-						temp = "Kinder";
-					else if(x >= 2)
-						temp = (Integer.toString(x - 1));
+			else if(overdueListPanel.isVisible()) {
+				JOptionPane.showMessageDialog(null, "You can't enter an overdue book", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+			else if(booksListPanel.isVisible()) {
+				String serial = null;
+				String book = null;
+				String author = null;
+				String total = null;
+				
+				//total textfield
+				String[] totalList = new String[21];
+				for(int x = 0; x < totalList.length; x++)
+					totalList[x] = Integer.toString(x);
+				JComboBox<String> totalComboBox = new JComboBox<String>(totalList);
+				
+				JTextField bookTextField = new JTextField(booksList[booksListValue][1]);
+				JTextField authorTextField = new JTextField(booksList[booksListValue][2]);
+				
+				//serial combobox
+				String[] serialList = new String[1000];
+				for(int x = 0; x < serialList.length; x++) {
+					String temp;
+					if(x < 10)
+						temp = "00" + Integer.toString(x);
+					else if(x > 9 && x < 100)
+						temp = "0" + Integer.toString(x);
+					else
+						temp = Integer.toString(x);
 					
-					for(int y = 0; y < gradeList.length; y++) {
-						if(gradeList[y][0] != null) {
-							if(gradeList[y][0].equals(temp))
-								mark++;
+					boolean mark = false;
+					for(int y = 0; y < booksList.length; y++) {
+						if(booksList[y][0] != null) {
+							if(booksList[y][0].equals(temp)) {
+								if(!temp.equals(booksList[booksListValue][0])) {
+									mark = true;
+									y = booksList.length + 1;
+								}
+							}
 						}
 					}
-					if(mark == 0) {
-						gradeSelections[x] = temp;
+					if(!mark) {
+						serialList[x] = temp;
 					}
 				}
-				for(int x = 0; x < gradeSelections.length; x++) {
-					if((x + 1) < gradeSelections.length) {
-						if(gradeSelections[x] == null && gradeSelections[x + 1] != null) {
-							gradeSelections[x] = gradeSelections[x + 1];
-							gradeSelections[x + 1] = null;
+				for(int x = 0; x < serialList.length; x++) {
+					if((x + 1) < serialList.length) {
+						if(serialList[x] == null && serialList[x + 1] != null) {
+							serialList[x] = serialList[x + 1];
+							serialList[x + 1] = null;
 							x = 0;
 						}
 					}
 				}
-				
 				int mark = 0;
-				for(int x = 0; x < gradeSelections.length; x++) {
-					if(gradeSelections[x] != null)
+				for(int x = 0; x < serialList.length; x++) {
+					if(serialList[x] != null)
 						mark++;
 				}
-				String[] gradeSelectionsSort = new String[mark];
-				for(int x = 0; x < gradeSelectionsSort.length; x++) {
-					if(gradeSelections[x] != null)
-						gradeSelectionsSort[x] = gradeSelections[x];
-				}
+				String[] serialListSort = new String[mark];
+				for(int x = 0; x < serialListSort.length; x++)
+					serialListSort[x] = serialList[x];
+				JComboBox<String> serialComboBox = new JComboBox<String>(serialListSort);
 				
-				JComboBox gradeComboBox = new JComboBox(gradeSelectionsSort);
 				Object[] message = {
-						"Grade: ", gradeComboBox
+						"Serial Number: ", serialComboBox,
+						"Book Name: ", bookTextField,
+						"Author Name: ", authorTextField,
+						"Total in Inventory: ", totalComboBox,
+						delete
 				};
 				int option = JOptionPane.showConfirmDialog(null, message, "Enter all your values", JOptionPane.OK_CANCEL_OPTION);
 				if(option == JOptionPane.OK_OPTION) {
-					grade = gradeSelections[gradeComboBox.getSelectedIndex()];
-					for(int x = 0; x < gradeList.length; x++) {
-						if(gradeList[x][0] == null) {
-							gradeList[x][0] = grade;
+					for(int x = 0; x < booksList.length; x++) {
+						if(booksList[x][0] == null) {
+							serial = serialList[serialComboBox.getSelectedIndex()];
+							book = bookTextField.getText();
+							author = authorTextField.getText();
+							total = totalList[totalComboBox.getSelectedIndex()];
 							
-							mark = 0;
-							for(int y = 0; y < gradeList.length; y++) {
-								if(gradeList[y][0] != null)
-									mark++;
-							}
-							String[] gradeListSort = new String[mark];
-							for(int y = 0; y < gradeListSort.length; y++) {
-								if(gradeList[y][0] != null)
-									gradeListSort[y] = gradeList[y][0];
-							}
+							booksList[x][0] = serial;
+							booksList[x][1] = book;
+							booksList[x][2] = author;
+							booksList[x][3] = total;
 							
-							for(int y = 0; y < gradeListSort.length; y++) {
-								if(!isInteger(gradeListSort[y])) {
-									if(y != 0) {
-										String temp = gradeListSort[y - 1];
-										gradeListSort[y - 1] = gradeListSort[y];
-										gradeListSort[y] = temp;
-										temp = "";
-										y = 0;
-									}
-								}
-								else if(y != gradeListSort.length && y != gradeListSort.length - 1) {
-									if(isInteger(gradeListSort[y]) && isInteger(gradeListSort[y + 1]) && 
-											Integer.parseInt(gradeListSort[y]) > Integer.parseInt(gradeListSort[y + 1])) {
-										String temp = gradeListSort[y + 1];
-										gradeListSort[y + 1] = gradeListSort[y];
-										gradeListSort[y] = temp;
-										temp = "";
-										y = 0;
-									}
-								}
-							}
-							
-							for(int y = 0; y < gradeListSort.length; y++) {
-								if(gradeListSort != null)
-									gradeList[y][0] = gradeListSort[y];
-							}
-							
-							gradeDLM.clear();
-							for(int y = 0; y < gradeListSort.length; y++) {
-								if(gradeListSort[y] != null)
-									gradeDLM.addElement(gradeListSort[y]);
-							}
-							gradeListPanel.validate();
-							gradeListPanel.repaint();
-							x = gradeList.length + 1;
+							booksDLM.addElement(booksList[x][1]);
+							booksListPanel.repaint();
+							booksListPanel.validate();
+							x = booksList.length + 1;
 						}
 					}
 				}
-				//Actually add the grade and stuff
-			}*/
+			}
 		}
 	}
 	
@@ -1030,7 +1368,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				nMark = true;
 			}
 			if(cMark == false) {
-				list[x] = "//First Name, Last Name, Serial of Book, When It Was Checked Out, How Long Till It's Overdue";
+				list[x] = "//Serial of Book, First Name, Last Name, When It Was Checked Out, How Long Till It's Overdue";
 				x++;
 				list[x] = "[CHECKEDOUT] {";
 				x++;
@@ -1056,7 +1394,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				cMark = true;
 			}
 			if(oMark == false) {
-				list[x] = "//First Name, Last Name, Serial of Book, How Long It's Been Overdue";
+				list[x] = "//Serial of Book, First Name, Last Name, How Long It's Been Overdue";
 				x++;
 				list[x] = "[OVERDUE] {";
 				x++;
@@ -1082,7 +1420,7 @@ public class CodingProgramming extends JFrame implements ActionListener {
 				oMark = true;
 			}
 			if(bMark == false) {
-				list[x] = "//Serial Number, Book Name, Author, Number in Stock, Total Inventory";
+				list[x] = "//Serial Number, Book Name, Author, Total Inventory, Number in Stock";
 				x++;
 				list[x] = "[BOOKS] {";
 				x++;
