@@ -1,16 +1,13 @@
-import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.text.NumberFormatter;
 
 public class CodingProgramming extends JFrame implements ActionListener {
 	//static final int LIMIT = (2147483647 - 8) / 5;
@@ -1123,11 +1120,11 @@ public class CodingProgramming extends JFrame implements ActionListener {
 							for(int y = 0; y < booksList.length; y++) {
 								if(booksList[y][0] != null && serial.equals(booksList[y][1])) {
 									serial = booksList[y][0];
-									booksList[y][4] = Integer.toString(Integer.parseInt(booksList[y][4]) - 1);
-									if(booksList[y][4].equals("-1")) {
-										JOptionPane.showMessageDialog(null, "There are not enough books in inventory", "Error", JOptionPane.ERROR_MESSAGE);
-										return;
-									}
+									//booksList[y][4] = Integer.toString(Integer.parseInt(booksList[y][4]) - 1);
+									//if(booksList[y][4].equals("-1")) {
+										//JOptionPane.showMessageDialog(null, "There are not enough books in inventory", "Error", JOptionPane.ERROR_MESSAGE);
+										//return;
+									//}
 								}
 							}
 							
